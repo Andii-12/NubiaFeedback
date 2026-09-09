@@ -5,7 +5,7 @@ import type { AirlineDTO, LocationDTO } from "@/types";
 import { DEVICES, DEVICE_STATUS, FULLY_RESOLVED, IMPACT_LEVELS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Filter, X } from "lucide-react";
+import { Filter } from "lucide-react";
 
 export type FilterState = {
   range: string;
@@ -235,16 +235,16 @@ export function FilterBar({
           onChange={(e) => set("q", e.target.value)}
         />
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="relative gap-2">
-              <Filter className="size-4" />
-              <span className="hidden sm:inline">Filters</span>
-              {activeFilterCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-xs text-white">
-                  {activeFilterCount}
-                </span>
-              )}
-            </Button>
+          <SheetTrigger
+            className="relative inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-border bg-white px-3 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
+            <Filter className="size-4" />
+            <span className="hidden sm:inline">Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-xs text-white">
+                {activeFilterCount}
+              </span>
+            )}
           </SheetTrigger>
           <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
             <SheetHeader>
