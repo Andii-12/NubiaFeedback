@@ -251,9 +251,18 @@ export async function ensureSeeded() {
     { name: "Tuvshinbayar", email: "tuvshin@nubia.airport", isActive: true },
   ]);
 
-  const passwordHash = await bcrypt.hash("NubiaAdmin2026!", 10);
-  const engineerHash = await bcrypt.hash("NubiaEng2026!", 10);
-  const viewerHash = await bcrypt.hash("NubiaView2026!", 10);
+  const passwordHash = await bcrypt.hash(
+    process.env.ADMIN_PASSWORD || "NubiaAdmin2026!",
+    10
+  );
+  const engineerHash = await bcrypt.hash(
+    process.env.ENGINEER_PASSWORD || "NubiaEng2026!",
+    10
+  );
+  const viewerHash = await bcrypt.hash(
+    process.env.VIEWER_PASSWORD || "NubiaView2026!",
+    10
+  );
 
   await AdminUser.insertMany([
     {

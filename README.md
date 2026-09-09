@@ -47,10 +47,15 @@ Airline staff do **not** log in. The public form is QR-accessible.
 
 Copy `.env.example` to `.env.local` and set:
 
-- `MONGODB_URI`
-- `AUTH_SECRET`
-- `AUTH_URL`
-- `NEXT_PUBLIC_APP_URL` (used for QR links)
+- `MONGODB_URI` - MongoDB connection string
+- `AUTH_SECRET` - Random secret for Auth.js (generate with `openssl rand -base64 32`)
+- `AUTH_URL` - Application URL (e.g., `http://localhost:3000`)
+- `NEXT_PUBLIC_APP_URL` - Public URL used for QR code links
+- `ADMIN_PASSWORD` - (Optional) Default admin password for seeding
+- `ENGINEER_PASSWORD` - (Optional) Default engineer password for seeding
+- `VIEWER_PASSWORD` - (Optional) Default viewer password for seeding
+
+**Security Note**: The password environment variables allow you to set custom credentials during database seeding. If not set, the default passwords from the table above will be used. Always change these credentials in production environments.
 
 ## Seed
 
