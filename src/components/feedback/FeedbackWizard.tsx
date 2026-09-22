@@ -24,16 +24,24 @@ import {
   EXPLANATION_QUALITY,
   FULLY_RESOLVED,
   IMPACT_LEVELS,
-  PRINTING_STATUS,
   RESOLUTION_SPEED,
   RESPONSE_SPEED,
-  SCANNING_STATUS,
   TONE_CLASSES,
-  WORKSTATION_STATUS,
 } from "@/lib/constants";
+import { DateSelector } from "@/components/nubia/DateSelector";
+import {
+  answerFor,
+  detailOptions,
+  detailQuestion,
+  deviceLabel,
+  missingDeviceAnswer,
+  orderedDevices,
+  pruneAnswers,
+  upsertAnswer,
+} from "@/lib/device-answers";
+import { isCompleteDate } from "@/lib/date-parts";
 import { CheckCircle2, CircleAlert, CircleMinus, Clock3, WifiOff } from "lucide-react";
-import type { LocationType } from "@/types";
-import { stampDateTime } from "@/lib/utils";
+import { localTime, shiftFromHour } from "@/lib/utils";
 
 const STATUS_ICONS = {
   normal: <CheckCircle2 className="size-5 text-emerald-600" />,
@@ -45,8 +53,7 @@ const STATUS_ICONS = {
 
 export function FeedbackWizard() {
   const router = useRouter();
-  const { form, update, setForm, reset, showPrinting, showScanning, showWorkstation } =
-    useFeedbackForm();
+  const { form, update, setForm, reset } = useFeedbackForm();
   const { airlines, locations, loading } = useCatalog();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -57,18 +64,21 @@ export function FeedbackWizard() {
   function validateStep(current: number) {
     if (current === 1) {
       if (!form.airlineId) return "Airline сонгоно уу.";
-      if (!form.locationType) return "Байршлын төрөл сонгоно уу.";
-      if (!form.locationId) return "Байршлаа сонгоно уу.";
+      if (form.locationTypes.length !== 1) return "Байршлын төрөл сонгоно уу.";
+      const selected = locations.filter((item) =>
+        form.locationIds.includes(item._id)
+      );
+      if (selected.length !== 1 || selected[0]?.type !== form.locationTypes[0]) {
+        return form.locationTypes[0] === "checkin"
+          ? "Check-in ширээ сонгоно уу."
+          : "Gate сонгоно уу.";
+      }
+      if (!isCompleteDate(form.date)) return "Он, сар, өдөр сонгоно уу.";
     }
     if (current === 2) {
       if (!form.devices.length) return "Төхөөрөмж сонгоно уу.";
-      if (!form.deviceStatus) return "Төхөөрөмжийн ажиллагааг сонгоно уу.";
-      if (showPrinting && !form.printingStatus)
-        return "Хэвлэх төхөөрөмжийн ажиллагааг сонгоно уу.";
-      if (showScanning && !form.scanningStatus)
-        return "OCR / BGR уншилтыг сонгоно уу.";
-      if (showWorkstation && !form.workstationStatus)
-        return "WS / системийн ажиллагааг сонгоно уу.";
+      const deviceMessage = missingDeviceAnswer(form.devices, form.deviceAnswers);
+      if (deviceMessage) return deviceMessage;
       if (!form.impactLevel) return "Нөлөөллийн түвшинг сонгоно уу.";
     }
     if (current === 3) {
@@ -100,7 +110,12 @@ export function FeedbackWizard() {
       return;
     }
     setSubmitting(true);
-    const stamped = { ...form, ...stampDateTime() };
+    const now = new Date();
+    const stamped = {
+      ...form,
+      time: localTime(now),
+      shift: shiftFromHour(now.getHours()),
+    };
     try {
       const res = await fetch("/api/feedback", {
         method: "POST",
@@ -203,17 +218,32 @@ export function FeedbackWizard() {
               </QuestionCard>
               <QuestionCard title="Байршлын төрөл">
                 <LocationSelector
-                  locationType={form.locationType}
-                  onTypeChange={(type) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      locationType: type as LocationType,
-                      locationId: "",
-                    }))
-                  }
+                  locationTypes={form.locationTypes}
+                  locationIds={form.locationIds}
                   locations={locations}
-                  locationId={form.locationId}
-                  onLocationChange={(id) => update("locationId", id)}
+                  onChange={({ locationTypes, locationIds }) =>
+                    setForm((prev) => {
+                      const devices = locationTypes.includes("gate")
+                        ? prev.devices
+                        : prev.devices.filter((device) => device !== "BGR");
+                      return {
+                        ...prev,
+                        locationTypes,
+                        locationIds,
+                        devices,
+                        deviceAnswers: pruneAnswers(devices, prev.deviceAnswers),
+                      };
+                    })
+                  }
+                />
+              </QuestionCard>
+              <QuestionCard
+                title="Огноо"
+                subtitle="Асуудал гарсан он, сар, өдрийг сонгоно уу."
+              >
+                <DateSelector
+                  value={form.date}
+                  onChange={(date) => update("date", date)}
                 />
               </QuestionCard>
             </>
@@ -224,89 +254,76 @@ export function FeedbackWizard() {
               <QuestionCard title="Ямар төхөөрөмж дээр асуудал гарсан бэ?">
                 <DeviceSelector
                   value={form.devices}
+                  showBgr={form.locationTypes.includes("gate")}
                   onChange={(devices) =>
                     setForm((prev) => ({
                       ...prev,
                       devices,
-                      printingStatus: devices.some((d) =>
-                        ["BTP", "BPP"].includes(d)
-                      )
-                        ? prev.printingStatus
-                        : "",
-                      scanningStatus: devices.some((d) =>
-                        ["OCR", "BGR"].includes(d)
-                      )
-                        ? prev.scanningStatus
-                        : "",
-                      workstationStatus: devices.some((d) =>
-                        ["WS", "Network"].includes(d)
-                      )
-                        ? prev.workstationStatus
-                        : "",
+                      deviceAnswers: pruneAnswers(devices, prev.deviceAnswers),
                     }))
                   }
                 />
               </QuestionCard>
-              <QuestionCard title="Төхөөрөмжийн ажиллагаа ямар байсан бэ?">
-                <div className="space-y-2">
-                  {DEVICE_STATUS.map((item) => (
-                    <ChoiceChip
-                      key={item.value}
-                      selected={form.deviceStatus === item.value}
-                      onClick={() => update("deviceStatus", item.value)}
-                      icon={STATUS_ICONS[item.value]}
-                      tone={form.deviceStatus === item.value ? TONE_CLASSES[item.tone] : ""}
-                    >
-                      {item.label}
-                    </ChoiceChip>
-                  ))}
-                </div>
-              </QuestionCard>
-              {showPrinting && (
-                <QuestionCard title="Хэвлэх төхөөрөмжийн ажиллагаа ямар байсан бэ?">
-                  <div className="space-y-2">
-                    {PRINTING_STATUS.map((item) => (
-                      <ChoiceChip
-                        key={item.value}
-                        selected={form.printingStatus === item.value}
-                        onClick={() => update("printingStatus", item.value)}
-                      >
-                        {item.label}
-                      </ChoiceChip>
-                    ))}
+              {orderedDevices(form.devices).map((device) => {
+                const answer = answerFor(form.deviceAnswers, device);
+                const details = detailOptions(device);
+                return (
+                  <div key={device} className="space-y-4">
+                    <QuestionCard title={`${deviceLabel(device)} ажиллагаа ямар байсан бэ?`}>
+                      <div className="space-y-2">
+                        {DEVICE_STATUS.map((item) => (
+                          <ChoiceChip
+                            key={item.value}
+                            selected={answer.status === item.value}
+                            onClick={() =>
+                              setForm((prev) => ({
+                                ...prev,
+                                deviceAnswers: upsertAnswer(
+                                  prev.deviceAnswers,
+                                  device,
+                                  { status: item.value }
+                                ),
+                              }))
+                            }
+                            icon={STATUS_ICONS[item.value]}
+                            tone={
+                              answer.status === item.value
+                                ? TONE_CLASSES[item.tone]
+                                : ""
+                            }
+                          >
+                            {item.label}
+                          </ChoiceChip>
+                        ))}
+                      </div>
+                    </QuestionCard>
+                    {details.length ? (
+                      <QuestionCard title={detailQuestion(device)}>
+                        <div className="space-y-2">
+                          {details.map((item) => (
+                            <ChoiceChip
+                              key={item.value}
+                              selected={answer.detail === item.value}
+                              onClick={() =>
+                                setForm((prev) => ({
+                                  ...prev,
+                                  deviceAnswers: upsertAnswer(
+                                    prev.deviceAnswers,
+                                    device,
+                                    { detail: item.value }
+                                  ),
+                                }))
+                              }
+                            >
+                              {item.label}
+                            </ChoiceChip>
+                          ))}
+                        </div>
+                      </QuestionCard>
+                    ) : null}
                   </div>
-                </QuestionCard>
-              )}
-              {showScanning && (
-                <QuestionCard title="OCR / BGR уншилт ямар байсан бэ?">
-                  <div className="space-y-2">
-                    {SCANNING_STATUS.map((item) => (
-                      <ChoiceChip
-                        key={item.value}
-                        selected={form.scanningStatus === item.value}
-                        onClick={() => update("scanningStatus", item.value)}
-                      >
-                        {item.label}
-                      </ChoiceChip>
-                    ))}
-                  </div>
-                </QuestionCard>
-              )}
-              {showWorkstation && (
-                <QuestionCard title="WS / системийн ажиллагаа ямар байсан бэ?">
-                  <div className="space-y-2">
-                    {WORKSTATION_STATUS.map((item) => (
-                      <ChoiceChip
-                        key={item.value}
-                        selected={form.workstationStatus === item.value}
-                        onClick={() => update("workstationStatus", item.value)}
-                      >
-                        {item.label}
-                      </ChoiceChip>
-                    ))}
-                  </div>
-                </QuestionCard>
-              )}
+                );
+              })}
               <QuestionCard title="Асуудал ажлын үйл ажиллагаанд хэр нөлөөлсөн бэ?">
                 <div className="space-y-2">
                   {IMPACT_LEVELS.map((item) => (

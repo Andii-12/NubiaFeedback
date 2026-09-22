@@ -2,17 +2,26 @@ import { z } from "zod";
 
 export const feedbackSchema = z.object({
   airlineId: z.string().min(1, "Airline сонгоно уу."),
-  locationType: z.enum(["checkin", "gate"], {
-    message: "Байршлын төрөл сонгоно уу.",
-  }),
-  locationId: z.string().min(1, "Байршлаа сонгоно уу."),
+  locationTypes: z
+    .array(z.enum(["checkin", "gate"]))
+    .min(1, "Байршлын төрөл сонгоно уу."),
+  locationIds: z.array(z.string().min(1)).min(1, "Байршлаа сонгоно уу."),
   date: z.string().min(1, "Огноо сонгоно уу."),
   shift: z.enum(["morning", "afternoon", "evening"], {
     message: "Ээлж сонгоно уу.",
   }),
   time: z.string().min(1),
   devices: z.array(z.string()).min(1, "Төхөөрөмж сонгоно уу."),
-  deviceStatus: z.string().min(1, "Төхөөрөмжийн ажиллагааг сонгоно уу."),
+  deviceAnswers: z
+    .array(
+      z.object({
+        device: z.string().min(1),
+        status: z.string().min(1),
+        detail: z.string().optional().default(""),
+      })
+    )
+    .default([]),
+  deviceStatus: z.string().optional().default(""),
   printingStatus: z.string().optional().default(""),
   scanningStatus: z.string().optional().default(""),
   workstationStatus: z.string().optional().default(""),

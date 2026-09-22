@@ -9,6 +9,7 @@ type FeedbackItem = {
   engineerRating: number;
   engineerAnswers: { fullyResolved: string };
   locationId?: { name?: string } | string;
+  locationIds?: ({ name?: string } | string)[];
   engineerId?: { name?: string } | string | null;
 };
 
@@ -22,11 +23,17 @@ function summarize(items: FeedbackItem[]) {
     for (const device of item.devices) {
       deviceCount[device] = (deviceCount[device] || 0) + 1;
     }
-    const loc =
-      typeof item.locationId === "object"
-        ? item.locationId?.name || ""
-        : "";
-    if (loc) locationCount[loc] = (locationCount[loc] || 0) + 1;
+    const named = (item.locationIds || [])
+      .map((loc) => (typeof loc === "object" ? loc?.name || "" : ""))
+      .filter(Boolean);
+    const locs = named.length
+      ? named
+      : [
+          typeof item.locationId === "object" ? item.locationId?.name || "" : "",
+        ].filter(Boolean);
+    for (const loc of locs) {
+      locationCount[loc] = (locationCount[loc] || 0) + 1;
+    }
     const eng =
       typeof item.engineerId === "object" && item.engineerId
         ? item.engineerId.name || ""
@@ -75,6 +82,7 @@ export async function GET() {
 
   const rows = await Feedback.find()
     .populate("locationId", "name")
+    .populate("locationIds", "name")
     .populate("engineerId", "name")
     .sort({ date: 1 });
 

@@ -12,6 +12,7 @@ import {
   SHIFTS,
   WORKSTATION_STATUS,
 } from "@/lib/constants";
+import { formatDeviceAnswers } from "@/lib/device-answers";
 import type { LocationType } from "@/types";
 
 function findLabel<T extends { value: string; label: string }>(
@@ -27,6 +28,10 @@ export const labels = {
   devices: (values?: string[]) =>
     values?.length ? values.map((v) => findLabel(DEVICES, v)).join(", ") : "—",
   deviceStatus: (value?: string) => findLabel(DEVICE_STATUS, value),
+  deviceReport: (
+    answers?: { device: string; status: string; detail?: string }[],
+    fallback?: string
+  ) => formatDeviceAnswers(answers) || findLabel(DEVICE_STATUS, fallback),
   printing: (value?: string) => findLabel(PRINTING_STATUS, value),
   scanning: (value?: string) => findLabel(SCANNING_STATUS, value),
   workstation: (value?: string) => findLabel(WORKSTATION_STATUS, value),
@@ -41,4 +46,12 @@ export const labels = {
   explanation: (value?: string) => findLabel(EXPLANATION_QUALITY, value),
   locationType: (value?: LocationType | string) =>
     value === "gate" ? "Gate" : value === "checkin" ? "Check-in" : "—",
+  locationTypes: (values?: (LocationType | string)[]) => {
+    if (!values?.length) return "—";
+    return [...new Set(values)]
+      .map((value) =>
+        value === "gate" ? "Gate" : value === "checkin" ? "Check-in" : value
+      )
+      .join(", ");
+  },
 };

@@ -43,7 +43,19 @@ export function FeedbackSummary({
   onEdit: (step: number) => void;
 }) {
   const airline = airlines.find((a) => a._id === form.airlineId);
-  const location = locations.find((l) => l._id === form.locationId);
+  const selected = locations.filter((item) => form.locationIds.includes(item._id));
+  const checkinNames = selected
+    .filter((item) => item.type === "checkin")
+    .map((item) => item.name);
+  const gateNames = selected
+    .filter((item) => item.type === "gate")
+    .map((item) => item.name);
+  const locationLabel = [
+    checkinNames.length ? `Check-in ${checkinNames.join(", ")}` : "",
+    gateNames.length ? gateNames.join(", ") : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div className="rounded-[16px] border border-border bg-white p-4 shadow-sm">
@@ -58,9 +70,10 @@ export function FeedbackSummary({
       />
       <Row
         label="Location"
-        value={`${labels.locationType(form.locationType)} ${location?.name || ""}`}
+        value={locationLabel}
         onEdit={() => onEdit(1)}
       />
+      <Row label="Огноо" value={form.date} onEdit={() => onEdit(1)} />
       <Row
         label="Device"
         value={labels.devices(form.devices)}
@@ -68,7 +81,9 @@ export function FeedbackSummary({
       />
       <Row
         label="Technical Status"
-        value={labels.deviceStatus(form.deviceStatus)}
+        value={
+          labels.deviceReport(form.deviceAnswers, form.deviceStatus) || "—"
+        }
         onEdit={() => onEdit(2)}
       />
       <Row

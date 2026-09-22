@@ -59,7 +59,7 @@ export default function ResponseDetailPage() {
             <Row label="Airline" value={item.airlineName || ""} />
             <Row
               label="Location"
-              value={`${labels.locationType(item.locationType)} ${item.locationName}`}
+              value={`${labels.locationTypes(item.locationTypes?.length ? item.locationTypes : [item.locationType])} · ${item.locationName || ""}`}
             />
             <Row label="Date / Time" value={`${item.date} ${item.time}`} />
             <Row label="Shift" value={labels.shift(item.shift)} />
@@ -69,20 +69,29 @@ export default function ResponseDetailPage() {
             <Row label="Devices" value={labels.devices(item.devices)} />
             <Row
               label="Device status"
-              value={labels.deviceStatus(item.technicalAnswers.deviceStatus)}
+              value={labels.deviceReport(
+                item.technicalAnswers.deviceAnswers,
+                item.technicalAnswers.deviceStatus
+              )}
             />
-            <Row
-              label="Printing"
-              value={labels.printing(item.technicalAnswers.printingStatus)}
-            />
-            <Row
-              label="OCR / BGR"
-              value={labels.scanning(item.technicalAnswers.scanningStatus)}
-            />
-            <Row
-              label="WS / Network"
-              value={labels.workstation(item.technicalAnswers.workstationStatus)}
-            />
+            {item.technicalAnswers.deviceAnswers?.length ? null : (
+              <>
+                <Row
+                  label="Printing"
+                  value={labels.printing(item.technicalAnswers.printingStatus)}
+                />
+                <Row
+                  label="OCR / BGR"
+                  value={labels.scanning(item.technicalAnswers.scanningStatus)}
+                />
+                <Row
+                  label="WS / Network"
+                  value={labels.workstation(
+                    item.technicalAnswers.workstationStatus
+                  )}
+                />
+              </>
+            )}
             <Row
               label="Impact"
               value={`${labels.impact(item.technicalAnswers.impactLevel)} (${labels.impactSeverity(item.technicalAnswers.impactLevel)})`}

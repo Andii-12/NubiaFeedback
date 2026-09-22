@@ -51,11 +51,18 @@ export function FeedbackTable({
             <TableCell>{item.time}</TableCell>
             <TableCell>{item.airlineName}</TableCell>
             <TableCell>{item.locationName}</TableCell>
-            <TableCell>{labels.locationType(item.locationType)}</TableCell>
+            <TableCell>
+              {labels.locationTypes(
+                item.locationTypes?.length ? item.locationTypes : [item.locationType]
+              )}
+            </TableCell>
             <TableCell>{labels.devices(item.devices)}</TableCell>
             <TableCell>
               <Badge variant="outline">
-                {labels.deviceStatus(item.technicalAnswers.deviceStatus)}
+                {labels.deviceReport(
+                  item.technicalAnswers.deviceAnswers,
+                  item.technicalAnswers.deviceStatus
+                )}
               </Badge>
             </TableCell>
             <TableCell>{item.engineerRating}</TableCell>

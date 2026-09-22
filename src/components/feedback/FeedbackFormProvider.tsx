@@ -34,6 +34,23 @@ type FormContextValue = {
 
 const FormContext = createContext<FormContextValue | null>(null);
 
+function savedLocations(parsed: Partial<FeedbackFormState> & {
+  locationId?: string;
+  locationType?: LocationType | "";
+}) {
+  const locationIds = Array.isArray(parsed.locationIds)
+    ? parsed.locationIds.filter(Boolean)
+    : parsed.locationId
+      ? [parsed.locationId]
+      : [];
+  const locationTypes = Array.isArray(parsed.locationTypes)
+    ? parsed.locationTypes.filter(Boolean)
+    : parsed.locationType
+      ? [parsed.locationType]
+      : [];
+  return { locationIds, locationTypes };
+}
+
 export function FeedbackFormProvider({
   children,
   prefill,
@@ -47,18 +64,31 @@ export function FeedbackFormProvider({
   }));
   const [hydrated, setHydrated] = useState(false);
 
+  const prefillIds = prefill?.locationIds?.join(",") ?? "";
+  const prefillTypes = prefill?.locationTypes?.join(",") ?? "";
+
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as FeedbackFormState;
+        const parsed = JSON.parse(saved) as FeedbackFormState & {
+          locationId?: string;
+          locationType?: LocationType | "";
+        };
+        const stored = savedLocations(parsed);
         setForm({
+          ...defaultFormState(),
           ...parsed,
-          ...prefill,
           airlineId: parsed.airlineId || prefill?.airlineId || "",
-          locationId: prefill?.locationId || parsed.locationId,
-          locationType: (prefill?.locationType ||
-            parsed.locationType) as LocationType | "",
+          locationIds: prefill?.locationIds?.length
+            ? prefill.locationIds
+            : stored.locationIds,
+          locationTypes: prefill?.locationTypes?.length
+            ? prefill.locationTypes
+            : stored.locationTypes,
+          deviceAnswers: Array.isArray(parsed.deviceAnswers)
+            ? parsed.deviceAnswers
+            : [],
         });
       } catch {
         /* ignore */
@@ -67,7 +97,7 @@ export function FeedbackFormProvider({
       setForm((prev) => ({ ...prev, ...prefill }));
     }
     setHydrated(true);
-  }, [prefill?.locationId, prefill?.locationType, prefill?.airlineId]);
+  }, [prefillIds, prefillTypes, prefill?.airlineId]);
 
   useEffect(() => {
     if (hydrated) {

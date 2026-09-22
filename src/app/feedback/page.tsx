@@ -24,11 +24,11 @@ function FeedbackInner() {
         const loc = data.location;
         if (loc) {
           setPrefill({
-            locationId: loc._id,
-            locationType: loc.type,
+            locationIds: [loc._id],
+            locationTypes: [loc.type],
           });
-        } else if (type) {
-          setPrefill({ locationType: type });
+        } else if (type === "checkin" || type === "gate") {
+          setPrefill({ locationTypes: [type], locationIds: [] });
         }
       }
       setReady(true);

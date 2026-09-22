@@ -14,14 +14,17 @@ export function DetailDrawer({ item }: { item: FeedbackDTO }) {
       <Row label="Airline" value={item.airlineName || ""} />
       <Row
         label="Location"
-        value={`${labels.locationType(item.locationType)} ${item.locationName}`}
+        value={`${labels.locationTypes(item.locationTypes?.length ? item.locationTypes : [item.locationType])} · ${item.locationName || ""}`}
       />
       <Row label="Date / Time" value={`${item.date} ${item.time}`} />
       <Row label="Shift" value={labels.shift(item.shift)} />
       <Row label="Devices" value={labels.devices(item.devices)} />
       <Row
         label="Technical status"
-        value={labels.deviceStatus(item.technicalAnswers.deviceStatus)}
+        value={labels.deviceReport(
+          item.technicalAnswers.deviceAnswers,
+          item.technicalAnswers.deviceStatus
+        )}
       />
       <Row
         label="Impact"

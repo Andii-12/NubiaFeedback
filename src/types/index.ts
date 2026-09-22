@@ -6,6 +6,7 @@ export type DeviceType =
   | "WS"
   | "BTP"
   | "BPP"
+  | "DCP"
   | "Network"
   | "Other";
 export type Shift = "morning" | "afternoon" | "evening";
@@ -58,12 +59,17 @@ export type ExplanationQuality =
 
 export interface FeedbackFormState {
   airlineId: string;
-  locationType: LocationType | "";
-  locationId: string;
+  locationTypes: LocationType[];
+  locationIds: string[];
   date: string;
   shift: Shift | "";
   time: string;
   devices: DeviceType[];
+  deviceAnswers: {
+    device: DeviceType;
+    status: DeviceStatus | "";
+    detail: string;
+  }[];
   deviceStatus: DeviceStatus | "";
   printingStatus: PrintingStatus | "";
   scanningStatus: ScanningStatus | "";
@@ -114,9 +120,11 @@ export interface FeedbackDTO {
   airlineId: string;
   airlineName?: string;
   locationId: string;
+  locationIds: string[];
   locationName?: string;
   locationCode?: string;
   locationType: LocationType;
+  locationTypes: LocationType[];
   date: string;
   time: string;
   shift: Shift;
@@ -127,6 +135,11 @@ export interface FeedbackDTO {
     scanningStatus?: ScanningStatus | "";
     workstationStatus?: WorkstationStatus | "";
     impactLevel: ImpactLevel;
+    deviceAnswers?: {
+      device: DeviceType;
+      status: DeviceStatus;
+      detail?: string;
+    }[];
   };
   engineerAnswers: {
     responseSpeed: ResponseSpeed;
@@ -154,12 +167,13 @@ export const defaultFormState = (): FeedbackFormState => {
   const day = String(now.getDate()).padStart(2, "0");
   return {
     airlineId: "",
-    locationType: "",
-    locationId: "",
+    locationTypes: [],
+    locationIds: [],
     date: `${y}-${m}-${day}`,
     shift,
     time: `${String(hour).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
     devices: [],
+    deviceAnswers: [],
     deviceStatus: "",
     printingStatus: "",
     scanningStatus: "",

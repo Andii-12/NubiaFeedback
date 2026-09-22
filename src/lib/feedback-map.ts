@@ -1,12 +1,51 @@
-import type { FeedbackDTO } from "@/types";
+import type { FeedbackDTO, LocationType } from "@/types";
 import { labels } from "@/lib/labels";
+
+type LocationRef =
+  | { _id?: unknown; name?: string; code?: string }
+  | string
+  | null
+  | undefined;
+
+function refItems(value: LocationRef | LocationRef[]) {
+  const list = Array.isArray(value) ? value : value == null || value === "" ? [] : [value];
+  return list.flatMap((item) => {
+    if (item == null || item === "") return [];
+    if (typeof item === "object") {
+      const id = item._id ? String(item._id) : "";
+      if (!id) return [];
+      return [{ id, name: item.name || "", code: item.code || "" }];
+    }
+    return [{ id: String(item), name: "", code: "" }];
+  });
+}
+
+export function readLocations(doc: {
+  locationId?: LocationRef | LocationRef[];
+  locationIds?: LocationRef | LocationRef[];
+  locationType?: LocationType | string;
+  locationTypes?: (LocationType | string)[];
+}) {
+  const many = refItems(doc.locationIds);
+  const locations = many.length ? many : refItems(doc.locationId);
+  const typeList =
+    Array.isArray(doc.locationTypes) && doc.locationTypes.length
+      ? doc.locationTypes
+      : doc.locationType
+        ? [doc.locationType]
+        : [];
+  const types = [...new Set(typeList)] as LocationType[];
+  return { locations, types };
+}
 
 export function toFeedbackDTO(doc: {
   _id: unknown;
   requestId: string;
   airlineId: { _id?: unknown; name?: string } | string;
   locationId: { _id?: unknown; name?: string; code?: string } | string;
+  locationIds?: LocationRef | LocationRef[];
   locationType: FeedbackDTO["locationType"];
+  locationTypes?: LocationType[];
   date: string;
   time: string;
   shift: FeedbackDTO["shift"];
@@ -24,10 +63,8 @@ export function toFeedbackDTO(doc: {
     typeof doc.airlineId === "object" && doc.airlineId
       ? doc.airlineId
       : { _id: doc.airlineId, name: "" };
-  const location =
-    typeof doc.locationId === "object" && doc.locationId
-      ? doc.locationId
-      : { _id: doc.locationId, name: "", code: "" };
+  const { locations, types } = readLocations(doc);
+  const primary = locations[0] || { id: "", name: "", code: "" };
   const engineer =
     typeof doc.engineerId === "object" && doc.engineerId
       ? doc.engineerId
@@ -38,10 +75,12 @@ export function toFeedbackDTO(doc: {
     requestId: doc.requestId,
     airlineId: String(airline._id || doc.airlineId),
     airlineName: airline.name,
-    locationId: String(location._id || doc.locationId),
-    locationName: location.name,
-    locationCode: location.code,
-    locationType: doc.locationType,
+    locationId: primary.id,
+    locationIds: locations.map((item) => item.id),
+    locationName: locations.map((item) => item.name).filter(Boolean).join(", "),
+    locationCode: locations.map((item) => item.code).filter(Boolean).join(", "),
+    locationType: types[0] || doc.locationType,
+    locationTypes: types.length ? types : [doc.locationType],
     date: doc.date,
     time: doc.time,
     shift: doc.shift,

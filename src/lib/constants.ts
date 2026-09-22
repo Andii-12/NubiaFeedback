@@ -18,11 +18,12 @@ export const DEVICES: {
   label: string;
   hint: string;
 }[] = [
-  { value: "OCR", label: "OCR", hint: "Passport / ID уншигч" },
+  { value: "OCR", label: "Keyboard / Swipe", hint: "Keyboard / Swipe" },
   { value: "BGR", label: "BGR", hint: "Barcode уншигч" },
-  { value: "WS", label: "WS", hint: "Workstation" },
+  { value: "WS", label: "Computer", hint: "Computer" },
   { value: "BTP", label: "BTP", hint: "Bag tag printer" },
   { value: "BPP", label: "BPP", hint: "Boarding pass printer" },
+  { value: "DCP", label: "DCP", hint: "DCP printer" },
   { value: "Network", label: "Network", hint: "Сүлжээ" },
   { value: "Other", label: "Бусад", hint: "Бусад төхөөрөмж" },
 ];
@@ -144,7 +145,7 @@ export const ENGINEER_RATING_LABELS: Record<number, string> = {
   5: "Маш сайн",
 };
 
-export const PRINT_DEVICES: DeviceType[] = ["BTP", "BPP"];
+export const PRINT_DEVICES: DeviceType[] = ["BTP", "BPP", "DCP"];
 export const SCAN_DEVICES: DeviceType[] = ["OCR", "BGR"];
 export const WS_DEVICES: DeviceType[] = ["WS", "Network"];
 

@@ -24,6 +24,7 @@ export default function AdminDashboardPage() {
       airlineName?: string;
       locationName?: string;
       locationType: "checkin" | "gate";
+      locationTypes?: ("checkin" | "gate")[];
       devices: FeedbackDTO["devices"];
       status: string;
       rating: number;
@@ -45,8 +46,12 @@ export default function AdminDashboardPage() {
       airlineId: "",
       airlineName: item.airlineName,
       locationId: "",
+      locationIds: [],
       locationName: item.locationName,
       locationType: item.locationType,
+      locationTypes: item.locationTypes?.length
+        ? item.locationTypes
+        : [item.locationType],
       date: item.date,
       time: item.time,
       shift: "morning",

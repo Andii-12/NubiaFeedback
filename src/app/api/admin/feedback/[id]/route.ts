@@ -15,6 +15,7 @@ export async function GET(
   const row = await Feedback.findById(id)
     .populate("airlineId", "name code")
     .populate("locationId", "name code type")
+    .populate("locationIds", "name code type")
     .populate("engineerId", "name");
   if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ item: toFeedbackDTO(row.toObject()) });
@@ -50,6 +51,7 @@ export async function PATCH(
   const populated = await Feedback.findById(id)
     .populate("airlineId", "name code")
     .populate("locationId", "name code type")
+    .populate("locationIds", "name code type")
     .populate("engineerId", "name");
   return NextResponse.json({ item: toFeedbackDTO(populated!.toObject()) });
 }

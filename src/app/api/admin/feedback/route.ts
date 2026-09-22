@@ -21,12 +21,34 @@ export async function GET(request: Request) {
   const query: Record<string, unknown> = {};
   if (from && to) query.date = { $gte: from, $lte: to };
   if (searchParams.get("airlineId")) query.airlineId = searchParams.get("airlineId");
-  if (searchParams.get("locationId")) query.locationId = searchParams.get("locationId");
-  if (searchParams.get("locationType"))
-    query.locationType = searchParams.get("locationType");
+  const locationFilters: Record<string, unknown>[] = [];
+  const locationId = searchParams.get("locationId");
+  const locationType = searchParams.get("locationType");
+  if (locationId) {
+    locationFilters.push({
+      $or: [{ locationId }, { locationIds: locationId }],
+    });
+  }
+  if (locationType) {
+    locationFilters.push({
+      $or: [{ locationType }, { locationTypes: locationType }],
+    });
+  }
+  if (locationFilters.length) query.$and = locationFilters;
   if (searchParams.get("device")) query.devices = searchParams.get("device");
-  if (searchParams.get("status"))
-    query["technicalAnswers.deviceStatus"] = searchParams.get("status");
+  if (searchParams.get("status")) {
+    const status = searchParams.get("status");
+    const statusMatch = {
+      $or: [
+        { "technicalAnswers.deviceStatus": status },
+        { "technicalAnswers.deviceAnswers.status": status },
+      ],
+    };
+    query.$and = [
+      ...((query.$and as Record<string, unknown>[]) || []),
+      statusMatch,
+    ];
+  }
   if (searchParams.get("impact"))
     query["technicalAnswers.impactLevel"] = searchParams.get("impact");
   if (searchParams.get("resolved"))
@@ -47,6 +69,7 @@ export async function GET(request: Request) {
   const rows = await Feedback.find(query)
     .populate("airlineId", "name code")
     .populate("locationId", "name code type")
+    .populate("locationIds", "name code type")
     .populate("engineerId", "name")
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)

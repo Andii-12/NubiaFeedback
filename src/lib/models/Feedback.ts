@@ -22,7 +22,14 @@ const FeedbackSchema = new mongoose.Schema(
       ref: "Location",
       required: true,
     },
+    locationIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Location",
+      },
+    ],
     locationType: { type: String, enum: ["checkin", "gate"], required: true },
+    locationTypes: [{ type: String, enum: ["checkin", "gate"] }],
     date: { type: String, required: true },
     time: { type: String, required: true },
     shift: {
@@ -37,6 +44,19 @@ const FeedbackSchema = new mongoose.Schema(
       scanningStatus: { type: String, default: "" },
       workstationStatus: { type: String, default: "" },
       impactLevel: { type: String, required: true },
+      deviceAnswers: {
+        type: [
+          new mongoose.Schema(
+            {
+              device: { type: String, required: true },
+              status: { type: String, required: true },
+              detail: { type: String, default: "" },
+            },
+            { _id: false }
+          ),
+        ],
+        default: [],
+      },
     },
     engineerAnswers: {
       responseSpeed: { type: String, required: true },
@@ -57,6 +77,7 @@ FeedbackSchema.index({ createdAt: -1 });
 FeedbackSchema.index({ date: -1 });
 FeedbackSchema.index({ airlineId: 1 });
 FeedbackSchema.index({ locationId: 1 });
+FeedbackSchema.index({ locationIds: 1 });
 
 export default mongoose.models.Feedback ||
   mongoose.model("Feedback", FeedbackSchema);

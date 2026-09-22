@@ -4,6 +4,7 @@ import { Feedback } from "@/lib/models";
 import { getSessionUser } from "@/lib/api-auth";
 import { previousRange, rangeToDates } from "@/lib/date-range";
 import { percentChange } from "@/lib/utils";
+import { readLocations } from "@/lib/feedback-map";
 
 function populatedName(value: unknown, fallback = "Unknown") {
   if (value && typeof value === "object" && "name" in value) {
@@ -26,7 +27,8 @@ export async function GET(request: Request) {
   const prev = previousRange(from, to);
   const current = await Feedback.find({ date: { $gte: from, $lte: to } })
     .populate("airlineId", "name")
-    .populate("locationId", "name");
+    .populate("locationId", "name")
+    .populate("locationIds", "name");
   const previous = await Feedback.find({
     date: { $gte: prev.from, $lte: prev.to },
   });
@@ -67,8 +69,11 @@ export async function GET(request: Request) {
     for (const device of item.devices) {
       deviceMap[device] = (deviceMap[device] || 0) + 1;
     }
-    const locName = populatedName(item.locationId);
-    locationMap[locName] = (locationMap[locName] || 0) + 1;
+    const places = readLocations(item);
+    for (const place of places.locations) {
+      const locName = place.name || "Unknown";
+      locationMap[locName] = (locationMap[locName] || 0) + 1;
+    }
     const airlineName = populatedName(item.airlineId);
     airlineMap[airlineName] = (airlineMap[airlineName] || 0) + 1;
     if (item.engineerRating >= 5) ratingMap["Very Good"] += 1;
@@ -101,19 +106,26 @@ export async function GET(request: Request) {
             new Date(a.createdAt as Date).getTime()
         )
         .slice(0, 8)
-        .map((item) => ({
+        .map((item) => {
+          const places = readLocations(item);
+          return {
           _id: String(item._id),
           requestId: item.requestId,
           time: item.time,
           date: item.date,
           airlineName: populatedName(item.airlineId, ""),
-          locationName: populatedName(item.locationId, ""),
-          locationType: item.locationType,
+          locationName: places.locations
+            .map((place) => place.name)
+            .filter(Boolean)
+            .join(", "),
+          locationTypes: places.types,
+          locationType: places.types[0] || item.locationType,
           devices: item.devices,
           status: item.technicalAnswers.deviceStatus,
           rating: item.engineerRating,
           resolved: item.engineerAnswers.fullyResolved,
-        })),
+        };
+        }),
     },
     devices: Object.entries(deviceMap).map(([name, count]) => ({ name, count })),
     locations: Object.entries(locationMap)

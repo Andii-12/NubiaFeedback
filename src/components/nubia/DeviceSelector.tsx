@@ -11,6 +11,7 @@ const ICONS: Record<DeviceType, React.ReactNode> = {
   WS: <Monitor className="size-5" />,
   BTP: <Printer className="size-5" />,
   BPP: <Ticket className="size-5" />,
+  DCP: <Printer className="size-5" />,
   Network: <Wifi className="size-5" />,
   Other: <MoreHorizontal className="size-5" />,
 };
@@ -18,9 +19,11 @@ const ICONS: Record<DeviceType, React.ReactNode> = {
 export function DeviceSelector({
   value,
   onChange,
+  showBgr = true,
 }: {
   value: DeviceType[];
   onChange: (next: DeviceType[]) => void;
+  showBgr?: boolean;
 }) {
   function toggle(device: DeviceType) {
     if (value.includes(device)) {
@@ -32,7 +35,7 @@ export function DeviceSelector({
 
   return (
     <div className="grid grid-cols-2 gap-2.5">
-      {DEVICES.map((device) => {
+      {DEVICES.filter((device) => showBgr || device.value !== "BGR").map((device) => {
         const selected = value.includes(device.value);
         return (
           <button

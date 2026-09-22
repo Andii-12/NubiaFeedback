@@ -22,12 +22,26 @@ export async function GET(request: Request) {
   const query: Record<string, unknown> = {};
   if (from && to) query.date = { $gte: from, $lte: to };
   if (searchParams.get("airlineId")) query.airlineId = searchParams.get("airlineId");
-  if (searchParams.get("locationId")) query.locationId = searchParams.get("locationId");
+  const locationFilters: Record<string, unknown>[] = [];
+  const locationId = searchParams.get("locationId");
+  const locationType = searchParams.get("locationType");
+  if (locationId) {
+    locationFilters.push({
+      $or: [{ locationId }, { locationIds: locationId }],
+    });
+  }
+  if (locationType) {
+    locationFilters.push({
+      $or: [{ locationType }, { locationTypes: locationType }],
+    });
+  }
+  if (locationFilters.length) query.$and = locationFilters;
   if (searchParams.get("device")) query.devices = searchParams.get("device");
 
   const rows = await Feedback.find(query)
     .populate("airlineId", "name")
     .populate("locationId", "name code")
+    .populate("locationIds", "name code")
     .sort({ date: -1, time: -1 });
   const mapped = rows.map((row) => {
     const item = toFeedbackDTO(row.toObject());
@@ -37,9 +51,12 @@ export async function GET(request: Request) {
       Time: item.time,
       Airline: item.airlineName,
       Location: item.locationName,
-      Type: labels.locationType(item.locationType),
+      Type: labels.locationTypes(item.locationTypes),
       Devices: labels.devices(item.devices),
-      Status: labels.deviceStatus(item.technicalAnswers.deviceStatus),
+      Status: labels.deviceReport(
+        item.technicalAnswers.deviceAnswers,
+        item.technicalAnswers.deviceStatus
+      ),
       Impact: labels.impact(item.technicalAnswers.impactLevel),
       Rating: item.engineerRating,
       Resolved: labels.fullyResolved(item.engineerAnswers.fullyResolved),
