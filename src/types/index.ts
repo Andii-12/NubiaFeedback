@@ -77,8 +77,11 @@ export interface FeedbackFormState {
   impactLevel: ImpactLevel | "";
   responseSpeed: ResponseSpeed | "";
   resolutionSpeed: ResolutionSpeed | "";
+  resolutionNote: string;
   fullyResolved: FullyResolved | "";
+  resolvedNote: string;
   communication: Communication | "";
+  communicationNote: string;
   explanationQuality: ExplanationQuality | "";
   engineerRating: number;
   comment: string;
@@ -144,8 +147,11 @@ export interface FeedbackDTO {
   engineerAnswers: {
     responseSpeed: ResponseSpeed;
     resolutionSpeed: ResolutionSpeed;
+    resolutionNote?: string;
     fullyResolved: FullyResolved;
+    resolvedNote?: string;
     communication: Communication;
+    communicationNote?: string;
     explanationQuality: ExplanationQuality;
   };
   engineerRating: number;
@@ -181,8 +187,11 @@ export const defaultFormState = (): FeedbackFormState => {
     impactLevel: "",
     responseSpeed: "",
     resolutionSpeed: "",
+    resolutionNote: "",
     fullyResolved: "",
+    resolvedNote: "",
     communication: "",
+    communicationNote: "",
     explanationQuality: "",
     engineerRating: 0,
     comment: "",

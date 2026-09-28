@@ -97,8 +97,27 @@ export function FeedbackSummary({
         onEdit={() => onEdit(3)}
       />
       <Row
+        label="Resolved quickly"
+        value={[
+          labels.resolutionSpeed(form.resolutionSpeed),
+          form.resolutionNote,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+        onEdit={() => onEdit(3)}
+      />
+      <Row
         label="Problem Resolved"
-        value={labels.fullyResolved(form.fullyResolved)}
+        value={[labels.fullyResolved(form.fullyResolved), form.resolvedNote]
+          .filter(Boolean)
+          .join(" · ")}
+        onEdit={() => onEdit(3)}
+      />
+      <Row
+        label="Communication"
+        value={[labels.communication(form.communication), form.communicationNote]
+          .filter(Boolean)
+          .join(" · ")}
         onEdit={() => onEdit(3)}
       />
       <Row

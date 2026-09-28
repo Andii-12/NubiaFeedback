@@ -42,6 +42,7 @@ export function detailQuestion(device: string) {
   const name = deviceLabel(device);
   if (kind === "print") return `${name} хэвлэлт ямар байсан бэ?`;
   if (kind === "scan") return `${name} уншилт ямар байсан бэ?`;
+  if (device === "WS") return "Танай DCS систем ямар байсан бэ?";
   if (kind === "workstation") return `${name} систем ямар байсан бэ?`;
   return "";
 }
@@ -56,6 +57,7 @@ export function detailOptions(device: string) {
 
 export function detailLabel(device: string, value?: string) {
   if (!value) return "";
+  if (deviceDetailKind(device) === "scan" && value === "slow") return "Удаан уншсан";
   return detailOptions(device).find((item) => item.value === value)?.label || value;
 }
 
@@ -94,9 +96,15 @@ export function missingDeviceAnswer(devices: string[], answers: DeviceAnswer[]) 
   for (const device of orderedDevices(devices)) {
     const answer = answers.find((item) => item.device === device);
     const name = deviceLabel(device);
-    if (!answer?.status) return `${name} ажиллагааг сонгоно уу.`;
-    if (deviceDetailKind(device) && !answer.detail) {
-      return `${name} дэлгэрэнгүй ажиллагааг сонгоно уу.`;
+    if (
+      !answer?.status ||
+      !DEVICE_STATUS.some((item) => item.value === answer.status)
+    ) {
+      return `${name} ажиллагааг сонгоно уу.`;
+    }
+    if (deviceDetailKind(device)) {
+      const allowed = detailOptions(device).some((item) => item.value === answer.detail);
+      if (!allowed) return `${name} дэлгэрэнгүй ажиллагааг сонгоно уу.`;
     }
   }
   return "";
@@ -129,7 +137,14 @@ export function formatDeviceAnswers(
     .map((device) => {
       const answer = answers.find((item) => item.device === device);
       if (!answer) return "";
+      const legacyStatus =
+        answer.status === "disconnected"
+          ? "Тасалдаж байсан"
+          : answer.status === "intermittent"
+            ? "Хааяа ажиллахгүй"
+            : "";
       const status =
+        legacyStatus ||
         DEVICE_STATUS.find((item) => item.value === answer.status)?.label ||
         answer.status;
       const detail = detailLabel(device, answer.detail);

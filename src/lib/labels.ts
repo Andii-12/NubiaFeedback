@@ -27,13 +27,18 @@ export const labels = {
   device: (value?: string) => findLabel(DEVICES, value),
   devices: (values?: string[]) =>
     values?.length ? values.map((v) => findLabel(DEVICES, v)).join(", ") : "—",
-  deviceStatus: (value?: string) => findLabel(DEVICE_STATUS, value),
+  deviceStatus: (value?: string) => {
+    if (value === "disconnected") return "Тасалдаж байсан";
+    if (value === "intermittent") return "Хааяа ажиллахгүй";
+    return findLabel(DEVICE_STATUS, value);
+  },
   deviceReport: (
     answers?: { device: string; status: string; detail?: string }[],
     fallback?: string
   ) => formatDeviceAnswers(answers) || findLabel(DEVICE_STATUS, fallback),
   printing: (value?: string) => findLabel(PRINTING_STATUS, value),
-  scanning: (value?: string) => findLabel(SCANNING_STATUS, value),
+  scanning: (value?: string) =>
+    value === "slow" ? "Удаан уншсан" : findLabel(SCANNING_STATUS, value),
   workstation: (value?: string) => findLabel(WORKSTATION_STATUS, value),
   impact: (value?: string) => findLabel(IMPACT_LEVELS, value),
   impactSeverity: (value?: string) =>

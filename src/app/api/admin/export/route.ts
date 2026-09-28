@@ -60,6 +60,11 @@ export async function GET(request: Request) {
       Impact: labels.impact(item.technicalAnswers.impactLevel),
       Rating: item.engineerRating,
       Resolved: labels.fullyResolved(item.engineerAnswers.fullyResolved),
+      "Resolved note": item.engineerAnswers.resolvedNote || "",
+      "Resolved quickly": labels.resolutionSpeed(item.engineerAnswers.resolutionSpeed),
+      "Resolved quickly note": item.engineerAnswers.resolutionNote || "",
+      Communication: labels.communication(item.engineerAnswers.communication),
+      "Communication note": item.engineerAnswers.communicationNote || "",
       Comment: item.comment || "",
     };
   });

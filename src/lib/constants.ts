@@ -21,11 +21,11 @@ export const DEVICES: {
   { value: "OCR", label: "Keyboard / Swipe", hint: "Keyboard / Swipe" },
   { value: "BGR", label: "BGR", hint: "Barcode уншигч" },
   { value: "WS", label: "Computer", hint: "Computer" },
-  { value: "BTP", label: "BTP", hint: "Bag tag printer" },
-  { value: "BPP", label: "BPP", hint: "Boarding pass printer" },
-  { value: "DCP", label: "DCP", hint: "DCP printer" },
-  { value: "Network", label: "Network", hint: "Сүлжээ" },
-  { value: "Other", label: "Бусад", hint: "Бусад төхөөрөмж" },
+  { value: "BTP", label: "BTP (Ачааны пайз хэвлэгч)", hint: "Ачааны пайз хэвлэгч" },
+  { value: "BPP", label: "BPP (Суугчийн талон хэвлэгч)", hint: "Суугчийн талон хэвлэгч" },
+  { value: "DCP", label: "DCP (Жагсаалт хэвлэгч)", hint: "Жагсаалт хэвлэгч" },
+  { value: "Network", label: "Network (Сүлжээ)", hint: "Сүлжээ" },
+  { value: "Other", label: "Бусад", hint: "Бусад төхөөрөмж, Mouse, Monitor" },
 ];
 
 export const SHIFTS: { value: Shift; label: string }[] = [
@@ -41,22 +41,19 @@ export const DEVICE_STATUS: {
 }[] = [
   { value: "normal", label: "Хэвийн", tone: "success" },
   { value: "slow", label: "Удаан", tone: "warning" },
-  { value: "intermittent", label: "Хааяа ажиллахгүй", tone: "caution" },
   { value: "down", label: "Ажиллахгүй", tone: "danger" },
-  { value: "disconnected", label: "Тасалдаж байсан", tone: "muted" },
 ];
 
 export const PRINTING_STATUS: { value: PrintingStatus; label: string }[] = [
   { value: "normal", label: "Хэвийн хэвлэж байсан" },
   { value: "slow", label: "Удаан хэвлэж байсан" },
   { value: "jammed", label: "Цаас гацсан" },
-  { value: "faded", label: "Бүдгэрч хэвлэсэн" },
+  { value: "faded", label: "Бүдэг хэвлэсэн" },
   { value: "none", label: "Огт хэвлээгүй" },
 ];
 
 export const SCANNING_STATUS: { value: ScanningStatus; label: string }[] = [
   { value: "normal", label: "Хэвийн уншсан" },
-  { value: "slow", label: "Удаан уншсан" },
   { value: "retries", label: "Олон дахин оролдсон" },
   { value: "partial", label: "Заримдаа уншаагүй" },
   { value: "none", label: "Огт уншаагүй" },

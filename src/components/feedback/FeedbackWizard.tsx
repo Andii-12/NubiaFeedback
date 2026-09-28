@@ -22,9 +22,7 @@ import {
   COMMUNICATION,
   DEVICE_STATUS,
   EXPLANATION_QUALITY,
-  FULLY_RESOLVED,
   IMPACT_LEVELS,
-  RESOLUTION_SPEED,
   RESPONSE_SPEED,
   TONE_CLASSES,
 } from "@/lib/constants";
@@ -39,16 +37,88 @@ import {
   pruneAnswers,
   upsertAnswer,
 } from "@/lib/device-answers";
-import { isCompleteDate } from "@/lib/date-parts";
-import { CheckCircle2, CircleAlert, CircleMinus, Clock3, WifiOff } from "lucide-react";
+import { isCompleteDate, isOnOrBeforeToday } from "@/lib/date-parts";
+import { CheckCircle2, CircleAlert, Clock3 } from "lucide-react";
 import { localTime, shiftFromHour } from "@/lib/utils";
+import type { DeviceStatus } from "@/types";
 
-const STATUS_ICONS = {
+const YES_NO = [
+  { value: "yes" as const, label: "Тийм" },
+  { value: "no" as const, label: "Үгүй" },
+];
+
+function communicationKind(value: string) {
+  if (value === "excellent" || value === "good") return "praise";
+  if (value === "average" || value === "poor") return "explain";
+  return "";
+}
+
+function communicationPrompt(value: string) {
+  if (communicationKind(value) === "praise") return "Инженерт урамшууллын үг бичээрэй.";
+  if (communicationKind(value) === "explain") {
+    return "Яагаад ийм байсан бэ? Товч тайлбарлана уу.";
+  }
+  return "";
+}
+
+function YesNoChoice({
+  value,
+  note,
+  onChoose,
+  onNote,
+}: {
+  value: string;
+  note: string;
+  onChoose: (next: "yes" | "no") => void;
+  onNote: (next: string) => void;
+}) {
+  const prompt =
+    value === "yes"
+      ? "Баярласнаа бичээрэй."
+      : value === "no"
+        ? "Яагаад?"
+        : "";
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        {YES_NO.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            onClick={() => onChoose(item.value)}
+            className={`h-14 rounded-[14px] border-2 text-sm font-semibold ${
+              value === item.value
+                ? "border-primary bg-nubia-light"
+                : "border-border bg-white"
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+      {prompt ? (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            {prompt} <span>(заавал биш)</span>
+          </p>
+          <textarea
+            value={note}
+            onChange={(event) => onNote(event.target.value.slice(0, 500))}
+            rows={3}
+            placeholder="Энд бичнэ үү..."
+            className="w-full rounded-[14px] border-2 border-border bg-white p-3 text-base text-navy outline-none placeholder:text-muted-foreground focus:border-primary"
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+const STATUS_ICONS: Partial<Record<DeviceStatus, React.ReactNode>> = {
   normal: <CheckCircle2 className="size-5 text-emerald-600" />,
   slow: <Clock3 className="size-5 text-amber-500" />,
-  intermittent: <CircleMinus className="size-5 text-orange-500" />,
   down: <CircleAlert className="size-5 text-red-500" />,
-  disconnected: <WifiOff className="size-5 text-slate-500" />,
 };
 
 export function FeedbackWizard() {
@@ -70,10 +140,11 @@ export function FeedbackWizard() {
       );
       if (selected.length !== 1 || selected[0]?.type !== form.locationTypes[0]) {
         return form.locationTypes[0] === "checkin"
-          ? "Check-in ширээ сонгоно уу."
+          ? "Бүртгэлийн цэг сонгоно уу."
           : "Gate сонгоно уу.";
       }
       if (!isCompleteDate(form.date)) return "Он, сар, өдөр сонгоно уу.";
+      if (!isOnOrBeforeToday(form.date)) return "Ирээдүйн огноо сонгох боломжгүй.";
     }
     if (current === 2) {
       if (!form.devices.length) return "Төхөөрөмж сонгоно уу.";
@@ -83,8 +154,12 @@ export function FeedbackWizard() {
     }
     if (current === 3) {
       if (!form.responseSpeed) return "Хариу өгөх хурдыг сонгоно уу.";
-      if (!form.resolutionSpeed) return "Шийдвэрлэлтийг сонгоно уу.";
-      if (!form.fullyResolved) return "Шийдэгдсэн эсэхийг сонгоно уу.";
+      if (form.resolutionSpeed !== "yes" && form.resolutionSpeed !== "no") {
+        return "Шийдвэрлэлтийг сонгоно уу.";
+      }
+      if (form.fullyResolved !== "yes" && form.fullyResolved !== "no") {
+        return "Шийдэгдсэн эсэхийг сонгоно уу.";
+      }
       if (!form.communication) return "Харилцааны үнэлгээг сонгоно уу.";
       if (!form.explanationQuality) return "Тайлбарын үнэлгээг сонгоно уу.";
       if (!form.engineerRating) return "Инженерийн үнэлгээг сонгоно уу.";
@@ -150,10 +225,10 @@ export function FeedbackWizard() {
   }, [step]);
 
   const subtitle = useMemo(() => {
-    if (step === 1) return "Таны санал, техникийн мэдээлэл бидэнд маш чухал. 1 минутын дотор бөглөнө үү.";
+    if (step === 1) return "Таны санал бидний сайжруулалтад чухал.";
     if (step === 2) return "Сонголтоо хийгээд үргэлжлүүлнэ үү.";
     if (step === 3) return "Доорх асуултуудад сонголтоор хариулна уу.";
-    if (step === 4) return "Хэрэв хүсвэл нэмэлт санал, хүсэлт, тайлбараа бичнэ үү.";
+    if (step === 4) return "Энд нэмэлт санал, гомдол байвал бичээрэй. (заавал биш)";
     return "Илгээхээсээ өмнө мэдээллээ шалгана уу.";
   }, [step]);
 
@@ -363,58 +438,81 @@ export function FeedbackWizard() {
                 </div>
               </QuestionCard>
               <QuestionCard title="Инженер асуудлыг хурдан шийдвэрлэж чадсан уу?">
-                <div className="grid grid-cols-3 gap-2">
-                  {RESOLUTION_SPEED.map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => update("resolutionSpeed", item.value)}
-                      className={`h-14 rounded-[14px] border-2 text-sm font-semibold ${
-                        form.resolutionSpeed === item.value
-                          ? "border-primary bg-nubia-light"
-                          : "border-border bg-white"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
+                <YesNoChoice
+                  value={form.resolutionSpeed}
+                  note={form.resolutionNote}
+                  onChoose={(value) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      resolutionSpeed: value,
+                      resolutionNote:
+                        prev.resolutionSpeed === value ? prev.resolutionNote : "",
+                    }))
+                  }
+                  onNote={(resolutionNote) => update("resolutionNote", resolutionNote)}
+                />
               </QuestionCard>
               <QuestionCard title="Асуудал бүрэн шийдэгдсэн үү?">
-                <div className="grid grid-cols-3 gap-2">
-                  {FULLY_RESOLVED.map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => update("fullyResolved", item.value)}
-                      className={`h-14 rounded-[14px] border-2 text-sm font-semibold ${
-                        form.fullyResolved === item.value
-                          ? "border-primary bg-nubia-light"
-                          : "border-border bg-white"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
+                <YesNoChoice
+                  value={form.fullyResolved}
+                  note={form.resolvedNote}
+                  onChoose={(value) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      fullyResolved: value,
+                      resolvedNote:
+                        prev.fullyResolved === value ? prev.resolvedNote : "",
+                    }))
+                  }
+                  onNote={(resolvedNote) => update("resolvedNote", resolvedNote)}
+                />
               </QuestionCard>
               <QuestionCard title="Инженерийн харилцаа, хандлага ямар байсан бэ?">
-                <div className="grid grid-cols-2 gap-2">
-                  {COMMUNICATION.map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => update("communication", item.value)}
-                      className={`flex min-h-[84px] flex-col items-center justify-center rounded-[16px] border-2 ${
-                        form.communication === item.value
-                          ? "border-primary bg-nubia-light"
-                          : "border-border bg-white"
-                      }`}
-                    >
-                      <span className="text-2xl">{item.emoji}</span>
-                      <span className="mt-1 text-sm font-semibold">{item.label}</span>
-                    </button>
-                  ))}
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    {COMMUNICATION.map((item) => (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() =>
+                          setForm((prev) => ({
+                            ...prev,
+                            communication: item.value,
+                            communicationNote:
+                              communicationKind(prev.communication) ===
+                              communicationKind(item.value)
+                                ? prev.communicationNote
+                                : "",
+                          }))
+                        }
+                        className={`flex min-h-[84px] flex-col items-center justify-center rounded-[16px] border-2 ${
+                          form.communication === item.value
+                            ? "border-primary bg-nubia-light"
+                            : "border-border bg-white"
+                        }`}
+                      >
+                        <span className="text-2xl">{item.emoji}</span>
+                        <span className="mt-1 text-sm font-semibold">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {communicationPrompt(form.communication) ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {communicationPrompt(form.communication)}{" "}
+                        <span>(заавал биш)</span>
+                      </p>
+                      <textarea
+                        value={form.communicationNote}
+                        onChange={(event) =>
+                          update("communicationNote", event.target.value.slice(0, 500))
+                        }
+                        rows={3}
+                        placeholder="Энд бичнэ үү..."
+                        className="w-full rounded-[14px] border-2 border-border bg-white p-3 text-base text-navy outline-none placeholder:text-muted-foreground focus:border-primary"
+                      />
+                    </div>
+                  ) : null}
                 </div>
               </QuestionCard>
               <QuestionCard title="Инженерийн тайлбар ойлгомжтой байсан уу?">
@@ -440,15 +538,10 @@ export function FeedbackWizard() {
           )}
 
           {step === 4 && (
-            <QuestionCard
-              title="Нэмэлт сэтгэгдэл"
-              subtitle="Энэ талбар заавал биш."
-            >
-              <CommentBox
-                value={form.comment}
-                onChange={(v) => update("comment", v)}
-              />
-            </QuestionCard>
+            <CommentBox
+              value={form.comment}
+              onChange={(v) => update("comment", v)}
+            />
           )}
 
           {step === 5 && (

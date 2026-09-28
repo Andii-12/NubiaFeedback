@@ -61,8 +61,11 @@ const FeedbackSchema = new mongoose.Schema(
     engineerAnswers: {
       responseSpeed: { type: String, required: true },
       resolutionSpeed: { type: String, required: true },
+      resolutionNote: { type: String, default: "", maxlength: 500 },
       fullyResolved: { type: String, required: true },
+      resolvedNote: { type: String, default: "", maxlength: 500 },
       communication: { type: String, required: true },
+      communicationNote: { type: String, default: "", maxlength: 500 },
       explanationQuality: { type: String, required: true },
     },
     engineerRating: { type: Number, min: 1, max: 5, required: true },

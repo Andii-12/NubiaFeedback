@@ -19,9 +19,8 @@ export default function HomePage() {
           <h1 className="text-5xl font-bold leading-tight text-navy md:text-6xl bg-gradient-to-br from-navy to-primary bg-clip-text text-transparent">
             Airline Staff Feedback Platform
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Check-in болон Gate ажилтнууд техникийн төхөөрөмж, AIS инженерийн
-            үйлчилгээний талаар 1 минутын дотор санал өгнө.
+          <p className="mt-6 max-w-xl text-2xl font-semibold leading-snug tracking-tight text-navy">
+            Таны санал. Бидний сайжруулалт.
           </p>
           <div className="mt-10">
             <Link

@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   MONTHS,
+  clampDateToToday,
   dateYearOptions,
   daysInMonth,
   parseDateParts,
+  todayParts,
   toDateString,
 } from "@/lib/date-parts";
 
@@ -15,16 +18,28 @@ export function DateSelector({
   value: string;
   onChange: (next: string) => void;
 }) {
-  const parts = parseDateParts(value);
-  const years = dateYearOptions();
-  const dayCount = daysInMonth(parts.year, parts.month);
+  const today = todayParts();
+  const parts = parseDateParts(clampDateToToday(value));
+  const years = dateYearOptions().filter((year) => year <= today.year);
+  const monthLimit = parts.year === today.year ? today.month : 12;
+  const dayCount =
+    parts.year === today.year && parts.month === today.month
+      ? today.day
+      : daysInMonth(parts.year, parts.month);
+
+  useEffect(() => {
+    const clamped = clampDateToToday(value);
+    if (clamped !== value) onChange(clamped);
+  }, [value, onChange]);
 
   function update(next: Partial<{ year: number; month: number; day: number }>) {
     onChange(
-      toDateString(
-        next.year ?? parts.year,
-        next.month ?? parts.month,
-        next.day ?? parts.day
+      clampDateToToday(
+        toDateString(
+          next.year ?? parts.year,
+          next.month ?? parts.month,
+          next.day ?? parts.day
+        )
       )
     );
   }
@@ -52,7 +67,7 @@ export function DateSelector({
           value={parts.month}
           onChange={(event) => update({ month: Number(event.target.value) })}
         >
-          {MONTHS.map((label, index) => (
+          {MONTHS.slice(0, monthLimit).map((label, index) => (
             <option key={label} value={index + 1}>
               {label}
             </option>

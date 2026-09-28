@@ -73,13 +73,13 @@ function buildLocations() {
   }
   locations.push(
     {
-      name: "Dom Gate 20",
+      name: "Gate 20",
       code: "DOMGATE20",
       type: "gate",
       qrIdentifier: "DOMGATE20",
     },
     {
-      name: "Dom Gate 21",
+      name: "Gate 21",
       code: "DOMGATE21",
       type: "gate",
       qrIdentifier: "DOMGATE21",
@@ -89,7 +89,7 @@ function buildLocations() {
 }
 
 const DEVICES: DeviceType[] = ["OCR", "BGR", "WS", "BTP", "BPP", "Network"];
-const DEVICE_STATUS = ["normal", "slow", "intermittent", "down", "disconnected"];
+const DEVICE_STATUS = ["normal", "slow", "down"];
 const IMPACT: ImpactLevel[] = ["none", "low", "medium", "high", "critical"];
 const SHIFTS = ["morning", "afternoon", "evening"] as const;
 const RESPONSE = ["very_fast", "fast", "average", "slow", "very_slow"];
@@ -131,7 +131,7 @@ function sampleFeedback(
       ? pick(["normal", "slow", "jammed", "faded", "none"], i)
       : "";
     const scanning = devices.some((d) => d === "OCR" || d === "BGR")
-      ? pick(["normal", "slow", "retries", "partial", "none"], i + 1)
+      ? pick(["normal", "retries", "partial", "none"], i + 1)
       : "";
     const workstation = devices.some((d) => d === "WS" || d === "Network")
       ? pick(["normal", "slow", "frozen", "disconnected", "reboot"], i + 2)
@@ -199,12 +199,12 @@ async function syncGateLocations() {
       return { name: `Gate ${n}`, code, qrIdentifier: code };
     }),
     {
-      name: "Dom Gate 20",
+      name: "Gate 20",
       code: "DOMGATE20",
       qrIdentifier: "DOMGATE20",
     },
     {
-      name: "Dom Gate 21",
+      name: "Gate 21",
       code: "DOMGATE21",
       qrIdentifier: "DOMGATE21",
     },

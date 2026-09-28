@@ -53,10 +53,33 @@ export function LocationSelector({
 
   const checkins = locations.filter((item) => item.type === "checkin");
   const gates = locations.filter((item) => item.type === "gate");
+  const gateNumber = (code: string) => {
+    const match = /^(?:DOM)?GATE(\d+)$/i.exec(code);
+    return match ? Number(match[1]) : 999;
+  };
+  const byGateNumber = (a: LocationDTO, b: LocationDTO) =>
+    gateNumber(a.code) - gateNumber(b.code);
+  const internationalGates = gates
+    .filter((item) => item.code.startsWith("GATE") && gateNumber(item.code) <= 6)
+    .sort(byGateNumber);
+  const domesticGates = gates
+    .filter((item) => item.code.startsWith("DOMGATE"))
+    .sort(byGateNumber);
+  const groupedGateIds = new Set(
+    [...internationalGates, ...domesticGates].map((item) => item._id)
+  );
+  const gateGroups = [
+    { label: "International", items: internationalGates },
+    { label: "Domestic", items: domesticGates },
+    {
+      label: "Бусад",
+      items: gates.filter((item) => !groupedGateIds.has(item._id)),
+    },
+  ].filter((group) => group.items.length > 0);
   const checkinGroups = [
-    { label: "A ширээ", items: checkins.filter((item) => item.code.startsWith("A")) },
-    { label: "C ширээ", items: checkins.filter((item) => item.code.startsWith("C")) },
-    { label: "D ширээ", items: checkins.filter((item) => item.code.startsWith("D")) },
+    { label: "A Бүртгэлийн цэг", items: checkins.filter((item) => item.code.startsWith("A")) },
+    { label: "C Бүртгэлийн цэг", items: checkins.filter((item) => item.code.startsWith("C")) },
+    { label: "D Бүртгэлийн цэг", items: checkins.filter((item) => item.code.startsWith("D")) },
     {
       label: "Бусад",
       items: checkins.filter((item) => !/^[ACD]/.test(item.code)),
@@ -108,7 +131,7 @@ export function LocationSelector({
 
       {locationType === "checkin" ? (
         <div className="space-y-3">
-          <span className="text-sm font-medium text-navy">Check-in ширээ</span>
+          <span className="text-sm font-medium text-navy">Бүртгэлийн цэгүүд</span>
           {checkinGroups.map((group) => (
             <div key={group.label} className="space-y-2">
               <div className="text-xs font-medium text-muted-foreground">
@@ -131,19 +154,25 @@ export function LocationSelector({
       ) : null}
 
       {locationType === "gate" ? (
-        <div className="space-y-2">
-          <span className="text-sm font-medium text-navy">Gate</span>
-          <div className="flex flex-wrap gap-2">
-            {gates.map((location) => (
-              <Chip
-                key={location._id}
-                selected={selectedId === location._id}
-                onClick={() => chooseLocation(location._id)}
-              >
-                {location.name}
-              </Chip>
-            ))}
-          </div>
+        <div className="space-y-3">
+          {gateGroups.map((group) => (
+            <div key={group.label} className="space-y-2">
+              <div className="text-xs font-medium text-muted-foreground">
+                {group.label}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {group.items.map((location) => (
+                  <Chip
+                    key={location._id}
+                    selected={selectedId === location._id}
+                    onClick={() => chooseLocation(location._id)}
+                  >
+                    {`Gate ${gateNumber(location.code)}`}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       ) : null}
     </div>

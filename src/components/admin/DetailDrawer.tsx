@@ -36,7 +36,12 @@ export function DetailDrawer({ item }: { item: FeedbackDTO }) {
       />
       <Row
         label="Resolved"
-        value={labels.fullyResolved(item.engineerAnswers.fullyResolved)}
+        value={[
+          labels.fullyResolved(item.engineerAnswers.fullyResolved),
+          item.engineerAnswers.resolvedNote,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
       />
       <Row label="Comment" value={item.comment || "—"} />
       <Link

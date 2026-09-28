@@ -9,7 +9,7 @@ import {
   orderedDevices,
   worstStatus,
 } from "@/lib/device-answers";
-import { isCompleteDate } from "@/lib/date-parts";
+import { isCompleteDate, isOnOrBeforeToday } from "@/lib/date-parts";
 import type { DeviceAnswer } from "@/lib/device-answers";
 import type { DeviceType } from "@/types";
 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
           {
             error:
               type === "checkin"
-                ? "Check-in ширээ сонгоно уу."
+                ? "Бүртгэлийн цэг сонгоно уу."
                 : "Gate сонгоно уу.",
           },
           { status: 400 }
@@ -68,6 +68,12 @@ export async function POST(request: Request) {
 
     if (!isCompleteDate(data.date)) {
       return NextResponse.json({ error: "Огноо сонгоно уу." }, { status: 400 });
+    }
+    if (!isOnOrBeforeToday(data.date)) {
+      return NextResponse.json(
+        { error: "Ирээдүйн огноо сонгох боломжгүй." },
+        { status: 400 }
+      );
     }
 
     const answers = data.deviceAnswers as DeviceAnswer[];
@@ -107,8 +113,11 @@ export async function POST(request: Request) {
       engineerAnswers: {
         responseSpeed: data.responseSpeed,
         resolutionSpeed: data.resolutionSpeed,
+        resolutionNote: data.resolutionNote.trim(),
         fullyResolved: data.fullyResolved,
+        resolvedNote: data.resolvedNote.trim(),
         communication: data.communication,
+        communicationNote: data.communicationNote.trim(),
         explanationQuality: data.explanationQuality,
       },
       engineerRating: data.engineerRating,

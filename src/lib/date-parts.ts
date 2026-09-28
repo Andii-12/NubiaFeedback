@@ -56,6 +56,41 @@ export function isCompleteDate(value: string) {
   return day >= 1 && day <= daysInMonth(year, month);
 }
 
+export function todayParts() {
+  const now = new Date();
+  return {
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    day: now.getDate(),
+  };
+}
+
+export function clampDateToToday(value: string) {
+  const today = todayParts();
+  const parts = parseDateParts(value);
+  let { year, month, day } = parts;
+
+  if (year > today.year) {
+    year = today.year;
+    month = today.month;
+    day = today.day;
+  } else if (year === today.year && month > today.month) {
+    month = today.month;
+  }
+
+  const monthLength = daysInMonth(year, month);
+  const maxDay =
+    year === today.year && month === today.month
+      ? Math.min(monthLength, today.day)
+      : monthLength;
+  day = Math.min(Math.max(day, 1), maxDay);
+  return toDateString(year, month, day);
+}
+
+export function isOnOrBeforeToday(value: string) {
+  return isCompleteDate(value) && clampDateToToday(value) === value;
+}
+
 export function dateYearOptions() {
   const currentYear = new Date().getFullYear();
   return [currentYear, currentYear - 1, currentYear - 2];

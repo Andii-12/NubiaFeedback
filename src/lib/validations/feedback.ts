@@ -27,9 +27,16 @@ export const feedbackSchema = z.object({
   workstationStatus: z.string().optional().default(""),
   impactLevel: z.string().min(1, "Нөлөөллийн түвшинг сонгоно уу."),
   responseSpeed: z.string().min(1, "Хариу өгөх хурдыг сонгоно уу."),
-  resolutionSpeed: z.string().min(1, "Шийдвэрлэлтийг сонгоно уу."),
-  fullyResolved: z.string().min(1, "Шийдэгдсэн эсэхийг сонгоно уу."),
+  resolutionSpeed: z.enum(["yes", "no"], {
+    message: "Шийдвэрлэлтийг сонгоно уу.",
+  }),
+  resolutionNote: z.string().max(500, "500 тэмдэгтээс хэтрэхгүй.").default(""),
+  fullyResolved: z.enum(["yes", "no"], {
+    message: "Шийдэгдсэн эсэхийг сонгоно уу.",
+  }),
+  resolvedNote: z.string().max(500, "500 тэмдэгтээс хэтрэхгүй.").default(""),
   communication: z.string().min(1, "Харилцааны үнэлгээг сонгоно уу."),
+  communicationNote: z.string().max(500, "500 тэмдэгтээс хэтрэхгүй.").default(""),
   explanationQuality: z.string().min(1, "Тайлбарын үнэлгээг сонгоно уу."),
   engineerRating: z
     .number()

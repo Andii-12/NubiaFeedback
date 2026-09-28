@@ -107,12 +107,24 @@ export default function ResponseDetailPage() {
               value={labels.resolutionSpeed(item.engineerAnswers.resolutionSpeed)}
             />
             <Row
+              label="Resolved quickly note"
+              value={item.engineerAnswers.resolutionNote || "—"}
+            />
+            <Row
               label="Fully resolved"
               value={labels.fullyResolved(item.engineerAnswers.fullyResolved)}
             />
             <Row
+              label="Fully resolved note"
+              value={item.engineerAnswers.resolvedNote || "—"}
+            />
+            <Row
               label="Communication"
               value={labels.communication(item.engineerAnswers.communication)}
+            />
+            <Row
+              label="Communication note"
+              value={item.engineerAnswers.communicationNote || "—"}
             />
             <Row
               label="Explanation"
