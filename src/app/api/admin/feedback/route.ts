@@ -68,18 +68,15 @@ export async function GET(request: Request) {
   const limit = Number(searchParams.get("limit") || 20);
   const total = await Feedback.countDocuments(query);
   const sort = searchParams.get("sort");
-  const order =
-    sort === "oldest"
-      ? { createdAt: 1 as const }
-      : sort === "date_asc"
-        ? { date: 1 as const, time: 1 as const }
-        : sort === "date_desc"
-          ? { date: -1 as const, time: -1 as const }
-          : sort === "rating_desc"
-            ? { engineerRating: -1 as const, createdAt: -1 as const }
-            : sort === "rating_asc"
-              ? { engineerRating: 1 as const, createdAt: -1 as const }
-              : { createdAt: -1 as const };
+  const orders: Record<string, Record<string, 1 | -1>> = {
+    oldest: { createdAt: 1 },
+    date_asc: { date: 1, time: 1 },
+    date_desc: { date: -1, time: -1 },
+    rating_desc: { engineerRating: -1, createdAt: -1 },
+    rating_asc: { engineerRating: 1, createdAt: -1 },
+    newest: { createdAt: -1 },
+  };
+  const order = orders[sort || "newest"] || orders.newest;
   const rows = await Feedback.find(query)
     .populate("airlineId", "name code")
     .populate("locationId", "name code type")
