@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 
 const ITEMS = [
-  { href: "/admin", label: "Самбар", icon: LayoutDashboard },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/responses", label: "Responses", icon: Inbox },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/engineers", label: "Engineers", icon: Users },

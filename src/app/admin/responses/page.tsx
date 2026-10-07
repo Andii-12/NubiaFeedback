@@ -86,7 +86,15 @@ export default function ResponsesPage() {
             CSV татах
           </button>
         </div>
-        <FeedbackTable items={items} onDelete={remove} />
+        <FeedbackTable
+          items={items}
+          onDelete={remove}
+          sort={filters.sort}
+          onSort={(sort) => {
+            setPage(1);
+            setFilters((prev) => ({ ...prev, sort }));
+          }}
+        />
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"

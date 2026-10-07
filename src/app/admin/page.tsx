@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { StatsCard } from "@/components/admin/StatsCard";
-import { FeedbackTable } from "@/components/admin/FeedbackTable";
-import type { FeedbackDTO } from "@/types";
 
 export default function AdminDashboardPage() {
   const [onDuty, setOnDuty] = useState<{
@@ -23,22 +21,6 @@ export default function AdminDashboardPage() {
     ratingChange: number;
     critical: number;
     criticalChange: number;
-    latest: {
-      _id: string;
-      requestId: string;
-      time: string;
-      date: string;
-      airlineName?: string;
-      locationName?: string;
-      locationType: "checkin" | "gate";
-      locationTypes?: ("checkin" | "gate")[];
-      devices: FeedbackDTO["devices"];
-      status: string;
-      deviceAnswers?: FeedbackDTO["technicalAnswers"]["deviceAnswers"];
-      rating: number;
-      resolved: string;
-      dutyEngineers?: string[];
-    }[];
   } | null>(null);
 
   useEffect(() => {
@@ -64,44 +46,8 @@ export default function AdminDashboardPage() {
       .catch(() => setOnDuty(null));
   }, []);
 
-  const latest: FeedbackDTO[] =
-    data?.latest.map((item) => ({
-      _id: item._id,
-      requestId: item.requestId,
-      airlineId: "",
-      airlineName: item.airlineName,
-      locationId: "",
-      locationIds: [],
-      locationName: item.locationName,
-      locationType: item.locationType,
-      locationTypes: item.locationTypes?.length
-        ? item.locationTypes
-        : [item.locationType],
-      date: item.date,
-      time: item.time,
-      shift: "morning",
-      devices: item.devices,
-      technicalAnswers: {
-        deviceStatus: item.status as FeedbackDTO["technicalAnswers"]["deviceStatus"],
-        impactLevel: "low",
-        deviceAnswers: item.deviceAnswers,
-      },
-      engineerAnswers: {
-        responseSpeed: "fast",
-        resolutionSpeed: "yes",
-        fullyResolved: item.resolved as FeedbackDTO["engineerAnswers"]["fullyResolved"],
-        communication: "good",
-        explanationQuality: "clear",
-      },
-      engineerRating: item.rating,
-      dutyEngineers: item.dutyEngineers || [],
-      adminNotes: [],
-      createdAt: "",
-      updatedAt: "",
-    })) || [];
-
   return (
-    <AdminShell title="Самбар">
+    <AdminShell title="Dashboard">
       <div className="mb-4 rounded-[16px] border border-border bg-white px-4 py-3">
         <div className="text-sm text-muted-foreground">
           Өнөөдрийн инженер {onDuty?.today ? `· ${onDuty.today}` : ""}
@@ -142,10 +88,6 @@ export default function AdminDashboardPage() {
           value={data?.critical ?? "—"}
           change={data?.criticalChange}
         />
-      </div>
-      <div className="mt-6 rounded-[16px] border border-border bg-white p-4">
-        <h2 className="mb-3 text-base font-semibold text-navy">Сүүлийн хариултууд</h2>
-        <FeedbackTable items={latest} />
       </div>
     </AdminShell>
   );

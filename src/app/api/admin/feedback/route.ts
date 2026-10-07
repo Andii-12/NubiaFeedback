@@ -67,12 +67,25 @@ export async function GET(request: Request) {
   const page = Number(searchParams.get("page") || 1);
   const limit = Number(searchParams.get("limit") || 20);
   const total = await Feedback.countDocuments(query);
+  const sort = searchParams.get("sort");
+  const order =
+    sort === "oldest"
+      ? { createdAt: 1 as const }
+      : sort === "date_asc"
+        ? { date: 1 as const, time: 1 as const }
+        : sort === "date_desc"
+          ? { date: -1 as const, time: -1 as const }
+          : sort === "rating_desc"
+            ? { engineerRating: -1 as const, createdAt: -1 as const }
+            : sort === "rating_asc"
+              ? { engineerRating: 1 as const, createdAt: -1 as const }
+              : { createdAt: -1 as const };
   const rows = await Feedback.find(query)
     .populate("airlineId", "name code")
     .populate("locationId", "name code type")
     .populate("locationIds", "name code type")
     .populate("engineerId", "name")
-    .sort({ createdAt: -1 })
+    .sort(order)
     .skip((page - 1) * limit)
     .limit(limit);
 

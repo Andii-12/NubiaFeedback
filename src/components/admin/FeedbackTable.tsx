@@ -16,10 +16,18 @@ import type { FeedbackDTO } from "@/types";
 export function FeedbackTable({
   items,
   onDelete,
+  sort,
+  onSort,
 }: {
   items: FeedbackDTO[];
   onDelete?: (item: FeedbackDTO) => void;
+  sort?: string;
+  onSort?: (sort: string) => void;
 }) {
+  function toggle(desc: string, asc: string) {
+    if (!onSort) return;
+    onSort(sort === desc ? asc : desc);
+  }
   return (
     <Table>
       <TableHeader>
@@ -31,9 +39,25 @@ export function FeedbackTable({
           <TableHead>Төрөл</TableHead>
           <TableHead>Төхөөрөмж</TableHead>
           <TableHead>Ажиллагаа</TableHead>
-          <TableHead>Үнэлгээ</TableHead>
+          <TableHead>
+            {onSort ? (
+              <button type="button" onClick={() => toggle("rating_desc", "rating_asc")}>
+                Үнэлгээ{sort === "rating_desc" ? " ↓" : sort === "rating_asc" ? " ↑" : ""}
+              </button>
+            ) : (
+              "Үнэлгээ"
+            )}
+          </TableHead>
           <TableHead>Шийдэгдсэн</TableHead>
-          <TableHead>Огноо</TableHead>
+          <TableHead>
+            {onSort ? (
+              <button type="button" onClick={() => toggle("date_desc", "date_asc")}>
+                Огноо{sort === "date_desc" ? " ↓" : sort === "date_asc" ? " ↑" : ""}
+              </button>
+            ) : (
+              "Огноо"
+            )}
+          </TableHead>
           <TableHead>Өдрийн инженер</TableHead>
           {onDelete ? <TableHead className="text-right">Үйлдэл</TableHead> : null}
         </TableRow>
