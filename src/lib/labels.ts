@@ -35,7 +35,13 @@ export const labels = {
   deviceReport: (
     answers?: { device: string; status: string; detail?: string }[],
     fallback?: string
-  ) => formatDeviceAnswers(answers) || findLabel(DEVICE_STATUS, fallback),
+  ) =>
+    formatDeviceAnswers(answers) ||
+    (fallback === "disconnected"
+      ? "Тасалдаж байсан"
+      : fallback === "intermittent"
+        ? "Хааяа ажиллахгүй"
+        : findLabel(DEVICE_STATUS, fallback)),
   printing: (value?: string) => findLabel(PRINTING_STATUS, value),
   scanning: (value?: string) =>
     value === "slow" ? "Удаан уншсан" : findLabel(SCANNING_STATUS, value),

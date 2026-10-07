@@ -22,7 +22,7 @@ export function ChoiceChip({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex min-h-12 w-full items-center gap-3 rounded-[14px] border-2 px-3.5 py-3 text-left text-[15px] font-medium transition-all",
+        "flex min-h-10 w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm font-medium transition-all",
         selected
           ? "border-primary bg-nubia-light text-navy shadow-sm"
           : "border-border bg-white text-navy hover:border-primary/40 hover:bg-nubia-light/60",
@@ -34,7 +34,7 @@ export function ChoiceChip({
       <span className="flex-1">{children}</span>
       <span
         className={cn(
-          "grid size-5 place-items-center rounded-full border",
+          "grid size-4 place-items-center rounded-full border",
           selected
             ? "border-primary bg-primary text-white"
             : "border-border bg-white"

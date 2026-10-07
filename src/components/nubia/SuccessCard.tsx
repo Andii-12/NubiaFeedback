@@ -28,26 +28,26 @@ export function SuccessCard({
         Таны хариулт бүртгэгдлээ. Баярлалаа.
       </p>
       <div className="mt-6 space-y-2 rounded-[14px] bg-nubia-light p-4 text-left text-sm">
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Airline</span>
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">Авиакомпани</span>
           <span className="font-medium text-navy">{airline}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Location</span>
-          <span className="font-medium text-navy">{location}</span>
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">Байршил</span>
+          <span className="text-right font-medium text-navy">{location}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Date</span>
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">Огноо</span>
           <span className="font-medium text-navy">{date}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Request ID</span>
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">Дугаар</span>
           <span className="font-semibold text-primary">#{requestId}</span>
         </div>
       </div>
       <div className="mt-6 grid gap-2">
         <Link href="/feedback" className={cn(buttonVariants(), "h-12 rounded-[14px] text-base")}>
-          Шинэ form бөглөх
+          Шинэ санал бөглөх
         </Link>
         <Link
           href="/"

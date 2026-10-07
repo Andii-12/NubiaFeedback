@@ -49,7 +49,7 @@ export function DateSelector({
       <label className="space-y-1.5">
         <span className="text-xs font-medium text-muted-foreground">Он</span>
         <select
-          className="h-12 w-full rounded-[14px] border-2 border-border bg-white px-2 text-base text-navy outline-none focus:border-primary"
+          className="h-10 w-full rounded-xl border border-border bg-white px-2 text-sm text-navy outline-none focus:border-primary"
           value={parts.year}
           onChange={(event) => update({ year: Number(event.target.value) })}
         >
@@ -63,7 +63,7 @@ export function DateSelector({
       <label className="space-y-1.5">
         <span className="text-xs font-medium text-muted-foreground">Сар</span>
         <select
-          className="h-12 w-full rounded-[14px] border-2 border-border bg-white px-2 text-base text-navy outline-none focus:border-primary"
+          className="h-10 w-full rounded-xl border border-border bg-white px-2 text-sm text-navy outline-none focus:border-primary"
           value={parts.month}
           onChange={(event) => update({ month: Number(event.target.value) })}
         >
@@ -77,7 +77,7 @@ export function DateSelector({
       <label className="space-y-1.5">
         <span className="text-xs font-medium text-muted-foreground">Өдөр</span>
         <select
-          className="h-12 w-full rounded-[14px] border-2 border-border bg-white px-2 text-base text-navy outline-none focus:border-primary"
+          className="h-10 w-full rounded-xl border border-border bg-white px-2 text-sm text-navy outline-none focus:border-primary"
           value={Math.min(parts.day, dayCount)}
           onChange={(event) => update({ day: Number(event.target.value) })}
         >

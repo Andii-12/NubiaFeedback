@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { Feedback } from "@/lib/models";
+import { Duty, Feedback } from "@/lib/models";
 import { getSessionUser } from "@/lib/api-auth";
 
 type FeedbackItem = {
@@ -94,11 +94,32 @@ export async function GET() {
     byMonth[month].push(item);
   }
 
-  const months = Object.keys(byMonth)
+  const dutyRows = await Duty.find().populate("engineerId", "name").sort({ date: 1 });
+  const dutiesByMonth: Record<string, { date: string; engineers: string[] }[]> = {};
+  const byDate = new Map<string, string[]>();
+  for (const row of dutyRows) {
+    const engineer = row.engineerId as { name?: string } | null;
+    const name = engineer?.name || "";
+    if (!name) continue;
+    const label = row.shift ? `${name} (${row.shift})` : name;
+    const list = byDate.get(row.date) || [];
+    list.push(label);
+    byDate.set(row.date, list);
+  }
+  for (const [date, engineers] of byDate) {
+    const month = date.slice(0, 7);
+    dutiesByMonth[month] ??= [];
+    dutiesByMonth[month].push({ date, engineers });
+  }
+
+  const months = [
+    ...new Set([...Object.keys(byMonth), ...Object.keys(dutiesByMonth)]),
+  ]
     .sort((a, b) => b.localeCompare(a))
     .map((month) => ({
       month,
-      ...summarize(byMonth[month]),
+      ...summarize(byMonth[month] || []),
+      duties: dutiesByMonth[month] || [],
     }));
 
   return NextResponse.json({

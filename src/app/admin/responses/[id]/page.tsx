@@ -62,6 +62,10 @@ export default function ResponseDetailPage() {
               value={`${labels.locationTypes(item.locationTypes?.length ? item.locationTypes : [item.locationType])} · ${item.locationName || ""}`}
             />
             <Row label="Date / Time" value={`${item.date} ${item.time}`} />
+            <Row
+              label="Өдрийн инженер"
+              value={item.dutyEngineers?.length ? item.dutyEngineers.join(", ") : "—"}
+            />
             <Row label="Shift" value={labels.shift(item.shift)} />
             <Row label="Request ID" value={item.requestId} />
           </Section>

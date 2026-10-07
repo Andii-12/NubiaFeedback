@@ -4,6 +4,7 @@ import { Feedback } from "@/lib/models";
 import { getSessionUser } from "@/lib/api-auth";
 import { toFeedbackDTO } from "@/lib/feedback-map";
 import { rangeToDates } from "@/lib/date-range";
+import { dutyNamesForDates } from "@/lib/duty-names";
 
 export async function GET(request: Request) {
   const user = await getSessionUser();
@@ -75,8 +76,14 @@ export async function GET(request: Request) {
     .skip((page - 1) * limit)
     .limit(limit);
 
+  const items = rows.map((row) => toFeedbackDTO(row.toObject()));
+  const onDuty = await dutyNamesForDates(items.map((item) => item.date));
+
   return NextResponse.json({
-    items: rows.map((row) => toFeedbackDTO(row.toObject())),
+    items: items.map((item) => ({
+      ...item,
+      dutyEngineers: onDuty.get(item.date) || [],
+    })),
     total,
     page,
     pages: Math.ceil(total / limit),

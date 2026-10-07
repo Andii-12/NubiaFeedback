@@ -158,6 +158,7 @@ export interface FeedbackDTO {
   comment?: string;
   engineerId?: string;
   engineerName?: string;
+  dutyEngineers?: string[];
   adminNotes: AdminNoteDTO[];
   createdAt: string;
   updatedAt: string;

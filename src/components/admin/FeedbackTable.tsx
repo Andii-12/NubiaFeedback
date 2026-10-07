@@ -24,20 +24,31 @@ export function FeedbackTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>ID</TableHead>
-          <TableHead>Time</TableHead>
-          <TableHead>Airline</TableHead>
-          <TableHead>Location</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Device</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Rating</TableHead>
-          <TableHead>Resolved</TableHead>
-          <TableHead>Date</TableHead>
-          {onDelete ? <TableHead className="text-right">Action</TableHead> : null}
+          <TableHead>Дугаар</TableHead>
+          <TableHead>Цаг</TableHead>
+          <TableHead>Авиакомпани</TableHead>
+          <TableHead>Байршил</TableHead>
+          <TableHead>Төрөл</TableHead>
+          <TableHead>Төхөөрөмж</TableHead>
+          <TableHead>Ажиллагаа</TableHead>
+          <TableHead>Үнэлгээ</TableHead>
+          <TableHead>Шийдэгдсэн</TableHead>
+          <TableHead>Огноо</TableHead>
+          <TableHead>Өдрийн инженер</TableHead>
+          {onDelete ? <TableHead className="text-right">Үйлдэл</TableHead> : null}
         </TableRow>
       </TableHeader>
       <TableBody>
+        {items.length === 0 ? (
+          <TableRow>
+            <TableCell
+              colSpan={onDelete ? 12 : 11}
+              className="py-8 text-center text-sm text-muted-foreground"
+            >
+              Хариулт алга
+            </TableCell>
+          </TableRow>
+        ) : null}
         {items.map((item) => (
           <TableRow key={item._id}>
             <TableCell>
@@ -70,6 +81,9 @@ export function FeedbackTable({
               {labels.fullyResolved(item.engineerAnswers.fullyResolved)}
             </TableCell>
             <TableCell>{item.date}</TableCell>
+            <TableCell>
+              {item.dutyEngineers?.length ? item.dutyEngineers.join(", ") : "—"}
+            </TableCell>
             {onDelete ? (
               <TableCell className="text-right">
                 <button
@@ -77,7 +91,7 @@ export function FeedbackTable({
                   onClick={() => onDelete(item)}
                   className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
                 >
-                  Delete
+                  Устгах
                 </button>
               </TableCell>
             ) : null}

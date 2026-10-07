@@ -59,45 +59,41 @@ export function FeedbackSummary({
 
   return (
     <div className="rounded-[16px] border border-border bg-white p-4 shadow-sm">
-      <h3 className="mb-1 text-base font-semibold text-navy">Хяналт</h3>
-      <p className="mb-2 text-sm text-muted-foreground">
-        Илгээхээсээ өмнө мэдээллээ шалгана уу.
-      </p>
       <Row
-        label="Airline"
+        label="Авиакомпани"
         value={airline?.name || ""}
         onEdit={() => onEdit(1)}
       />
       <Row
-        label="Location"
+        label="Байршил"
         value={locationLabel}
         onEdit={() => onEdit(1)}
       />
       <Row label="Огноо" value={form.date} onEdit={() => onEdit(1)} />
       <Row
-        label="Device"
+        label="Төхөөрөмж"
         value={labels.devices(form.devices)}
         onEdit={() => onEdit(2)}
       />
       <Row
-        label="Technical Status"
+        label="Ажиллагаа"
         value={
           labels.deviceReport(form.deviceAnswers, form.deviceStatus) || "—"
         }
         onEdit={() => onEdit(2)}
       />
       <Row
-        label="Impact"
+        label="Нөлөөлөл"
         value={labels.impact(form.impactLevel)}
         onEdit={() => onEdit(2)}
       />
       <Row
-        label="Engineer Response"
+        label="Хариу өгөх хурд"
         value={labels.responseSpeed(form.responseSpeed)}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Resolved quickly"
+        label="Хурдан шийдсэн эсэх"
         value={[
           labels.resolutionSpeed(form.resolutionSpeed),
           form.resolutionNote,
@@ -107,26 +103,31 @@ export function FeedbackSummary({
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Problem Resolved"
+        label="Бүрэн шийдэгдсэн эсэх"
         value={[labels.fullyResolved(form.fullyResolved), form.resolvedNote]
           .filter(Boolean)
           .join(" · ")}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Communication"
+        label="Харилцаа"
         value={[labels.communication(form.communication), form.communicationNote]
           .filter(Boolean)
           .join(" · ")}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Engineer Rating"
+        label="Тайлбар"
+        value={labels.explanation(form.explanationQuality)}
+        onEdit={() => onEdit(3)}
+      />
+      <Row
+        label="Үнэлгээ"
         value={form.engineerRating ? `${form.engineerRating} / 5` : "—"}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Comment"
+        label="Сэтгэгдэл"
         value={form.comment || "—"}
         onEdit={() => onEdit(4)}
       />

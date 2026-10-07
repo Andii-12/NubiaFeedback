@@ -16,17 +16,17 @@ export function QuestionCard({
   return (
     <section
       className={cn(
-        "rounded-[16px] border border-border bg-white p-4 shadow-sm",
+        "rounded-xl border border-border bg-white p-3 shadow-sm",
         className
       )}
     >
-      <h2 className="text-[17px] font-semibold leading-snug text-navy">
+      <h2 className="text-[15px] font-semibold leading-snug text-navy">
         {title}
       </h2>
       {subtitle ? (
-        <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
       ) : null}
-      <div className="mt-4">{children}</div>
+      <div className="mt-2.5">{children}</div>
     </section>
   );
 }

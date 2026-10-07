@@ -5,6 +5,7 @@ import AdminUser from "./AdminUser";
 import Engineer from "./Engineer";
 import Counter from "./Counter";
 import Settings from "./Settings";
+import Duty from "./Duty";
 
 export {
   Airline,
@@ -14,4 +15,5 @@ export {
   Engineer,
   Counter,
   Settings,
+  Duty,
 };

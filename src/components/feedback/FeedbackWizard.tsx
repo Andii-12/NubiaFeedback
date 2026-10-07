@@ -38,9 +38,7 @@ import {
   upsertAnswer,
 } from "@/lib/device-answers";
 import { isCompleteDate, isOnOrBeforeToday } from "@/lib/date-parts";
-import { CheckCircle2, CircleAlert, Clock3 } from "lucide-react";
 import { localTime, shiftFromHour } from "@/lib/utils";
-import type { DeviceStatus } from "@/types";
 
 const YES_NO = [
   { value: "yes" as const, label: "Тийм" },
@@ -87,7 +85,7 @@ function YesNoChoice({
             key={item.value}
             type="button"
             onClick={() => onChoose(item.value)}
-            className={`h-14 rounded-[14px] border-2 text-sm font-semibold ${
+            className={`h-10 rounded-xl border text-sm font-semibold ${
               value === item.value
                 ? "border-primary bg-nubia-light"
                 : "border-border bg-white"
@@ -105,9 +103,9 @@ function YesNoChoice({
           <textarea
             value={note}
             onChange={(event) => onNote(event.target.value.slice(0, 500))}
-            rows={3}
+            rows={2}
             placeholder="Энд бичнэ үү..."
-            className="w-full rounded-[14px] border-2 border-border bg-white p-3 text-base text-navy outline-none placeholder:text-muted-foreground focus:border-primary"
+            className="w-full rounded-xl border border-border bg-white p-2.5 text-sm text-navy outline-none placeholder:text-muted-foreground focus:border-primary"
           />
         </div>
       ) : null}
@@ -115,11 +113,13 @@ function YesNoChoice({
   );
 }
 
-const STATUS_ICONS: Partial<Record<DeviceStatus, React.ReactNode>> = {
-  normal: <CheckCircle2 className="size-5 text-emerald-600" />,
-  slow: <Clock3 className="size-5 text-amber-500" />,
-  down: <CircleAlert className="size-5 text-red-500" />,
-};
+function pillClass(selected: boolean) {
+  return `h-8 rounded-full border px-3 text-xs font-medium ${
+    selected
+      ? "border-primary bg-nubia-light text-navy"
+      : "border-border bg-white text-navy"
+  }`;
+}
 
 export function FeedbackWizard() {
   const router = useRouter();
@@ -226,35 +226,34 @@ export function FeedbackWizard() {
 
   const subtitle = useMemo(() => {
     if (step === 1) return "Таны санал бидний сайжруулалтад чухал.";
-    if (step === 2) return "Сонголтоо хийгээд үргэлжлүүлнэ үү.";
-    if (step === 3) return "Доорх асуултуудад сонголтоор хариулна уу.";
-    if (step === 4) return "Энд нэмэлт санал, гомдол байвал бичээрэй. (заавал биш)";
-    return "Илгээхээсээ өмнө мэдээллээ шалгана уу.";
+    if (step === 4) return "Нэмэлт санал, гомдол байвал бичээрэй. Заавал биш.";
+    if (step === 5) return "Илгээхээсээ өмнө мэдээллээ шалгана уу.";
+    return "";
   }, [step]);
 
   return (
     <div className="mx-auto w-full max-w-lg pb-28 md:pb-8">
-      <header className="mb-5 flex items-center justify-between">
+      <header className="mb-3 flex items-center justify-between">
         <NubiaLogo />
         <span className="rounded-full bg-nubia-light px-3 py-1 text-xs font-medium text-primary">
           NUBIA AIS
         </span>
       </header>
       <ProgressStepper step={displayStep} />
-      <div className="mt-5">
+      <div className="mt-3">
         {step === 1 ? (
           <>
-            <h1 className="text-[28px] font-semibold leading-tight text-navy">
-              Сайн байна уу 👋
+            <h1 className="text-xl font-semibold leading-tight text-navy">
+              Сайн байна уу
             </h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              {subtitle}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-semibold text-navy">{title}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+            <h1 className="text-xl font-semibold text-navy">{title}</h1>
+            {subtitle ? (
+              <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+            ) : null}
           </>
         )}
       </div>
@@ -272,13 +271,13 @@ export function FeedbackWizard() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -24 }}
           transition={{ duration: 0.2 }}
-          className="mt-5 space-y-4"
+          className="mt-3 space-y-3"
         >
           {step === 1 && (
             <>
               <QuestionCard title="Airline">
                 <select
-                  className="h-12 w-full rounded-[14px] border-2 border-border bg-white px-3 text-base outline-none focus:border-primary"
+                  className="h-10 w-full rounded-xl border border-border bg-white px-3 text-sm outline-none focus:border-primary"
                   value={form.airlineId}
                   onChange={(e) => update("airlineId", e.target.value)}
                   disabled={loading}
@@ -343,42 +342,42 @@ export function FeedbackWizard() {
                 const answer = answerFor(form.deviceAnswers, device);
                 const details = detailOptions(device);
                 return (
-                  <div key={device} className="space-y-4">
-                    <QuestionCard title={`${deviceLabel(device)} ажиллагаа ямар байсан бэ?`}>
-                      <div className="space-y-2">
-                        {DEVICE_STATUS.map((item) => (
-                          <ChoiceChip
-                            key={item.value}
-                            selected={answer.status === item.value}
-                            onClick={() =>
-                              setForm((prev) => ({
-                                ...prev,
-                                deviceAnswers: upsertAnswer(
-                                  prev.deviceAnswers,
-                                  device,
-                                  { status: item.value }
-                                ),
-                              }))
-                            }
-                            icon={STATUS_ICONS[item.value]}
-                            tone={
-                              answer.status === item.value
-                                ? TONE_CLASSES[item.tone]
-                                : ""
-                            }
-                          >
-                            {item.label}
-                          </ChoiceChip>
-                        ))}
-                      </div>
-                    </QuestionCard>
+                  <QuestionCard key={device} title={deviceLabel(device)}>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {DEVICE_STATUS.map((item) => (
+                        <button
+                          key={item.value}
+                          type="button"
+                          onClick={() =>
+                            setForm((prev) => ({
+                              ...prev,
+                              deviceAnswers: upsertAnswer(
+                                prev.deviceAnswers,
+                                device,
+                                { status: item.value }
+                              ),
+                            }))
+                          }
+                          className={`h-9 rounded-lg border text-xs font-semibold ${
+                            answer.status === item.value
+                              ? TONE_CLASSES[item.tone]
+                              : "border-border bg-white text-navy"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
                     {details.length ? (
-                      <QuestionCard title={detailQuestion(device)}>
-                        <div className="space-y-2">
+                      <div className="mt-3 space-y-1.5">
+                        <p className="text-xs text-muted-foreground">
+                          {detailQuestion(device)}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
                           {details.map((item) => (
-                            <ChoiceChip
+                            <button
                               key={item.value}
-                              selected={answer.detail === item.value}
+                              type="button"
                               onClick={() =>
                                 setForm((prev) => ({
                                   ...prev,
@@ -389,14 +388,15 @@ export function FeedbackWizard() {
                                   ),
                                 }))
                               }
+                              className={pillClass(answer.detail === item.value)}
                             >
                               {item.label}
-                            </ChoiceChip>
+                            </button>
                           ))}
                         </div>
-                      </QuestionCard>
+                      </div>
                     ) : null}
-                  </div>
+                  </QuestionCard>
                 );
               })}
               <QuestionCard title="Асуудал ажлын үйл ажиллагаанд хэр нөлөөлсөн бэ?">
@@ -407,14 +407,7 @@ export function FeedbackWizard() {
                       selected={form.impactLevel === item.value}
                       onClick={() => update("impactLevel", item.value)}
                     >
-                      <span className="flex w-full items-center justify-between gap-2">
-                        <span>{item.label}</span>
-                        <span
-                          className={`rounded-full border px-2 py-0.5 text-[11px] ${TONE_CLASSES[item.severity]}`}
-                        >
-                          {item.severity}
-                        </span>
-                      </span>
+                      {item.label}
                     </ChoiceChip>
                   ))}
                 </div>
@@ -425,15 +418,16 @@ export function FeedbackWizard() {
           {step === 3 && (
             <>
               <QuestionCard title="Инженер дуудлагад хэр хурдан хариу өгсөн бэ?">
-                <div className="space-y-2">
+                <div className="flex flex-wrap gap-1.5">
                   {RESPONSE_SPEED.map((item) => (
-                    <ChoiceChip
+                    <button
                       key={item.value}
-                      selected={form.responseSpeed === item.value}
+                      type="button"
                       onClick={() => update("responseSpeed", item.value)}
+                      className={pillClass(form.responseSpeed === item.value)}
                     >
                       {item.label}
-                    </ChoiceChip>
+                    </button>
                   ))}
                 </div>
               </QuestionCard>
@@ -485,14 +479,14 @@ export function FeedbackWizard() {
                                 : "",
                           }))
                         }
-                        className={`flex min-h-[84px] flex-col items-center justify-center rounded-[16px] border-2 ${
+                        className={`flex h-14 flex-col items-center justify-center rounded-xl border ${
                           form.communication === item.value
                             ? "border-primary bg-nubia-light"
                             : "border-border bg-white"
                         }`}
                       >
-                        <span className="text-2xl">{item.emoji}</span>
-                        <span className="mt-1 text-sm font-semibold">{item.label}</span>
+                        <span className="text-lg leading-none">{item.emoji}</span>
+                        <span className="mt-1 text-xs font-semibold">{item.label}</span>
                       </button>
                     ))}
                   </div>
@@ -507,24 +501,25 @@ export function FeedbackWizard() {
                         onChange={(event) =>
                           update("communicationNote", event.target.value.slice(0, 500))
                         }
-                        rows={3}
+                        rows={2}
                         placeholder="Энд бичнэ үү..."
-                        className="w-full rounded-[14px] border-2 border-border bg-white p-3 text-base text-navy outline-none placeholder:text-muted-foreground focus:border-primary"
+                        className="w-full rounded-xl border border-border bg-white p-2.5 text-sm text-navy outline-none placeholder:text-muted-foreground focus:border-primary"
                       />
                     </div>
                   ) : null}
                 </div>
               </QuestionCard>
               <QuestionCard title="Инженерийн тайлбар ойлгомжтой байсан уу?">
-                <div className="space-y-2">
+                <div className="flex flex-wrap gap-1.5">
                   {EXPLANATION_QUALITY.map((item) => (
-                    <ChoiceChip
+                    <button
                       key={item.value}
-                      selected={form.explanationQuality === item.value}
+                      type="button"
                       onClick={() => update("explanationQuality", item.value)}
+                      className={pillClass(form.explanationQuality === item.value)}
                     >
                       {item.label}
-                    </ChoiceChip>
+                    </button>
                   ))}
                 </div>
               </QuestionCard>

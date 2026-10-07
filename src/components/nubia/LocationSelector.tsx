@@ -19,7 +19,7 @@ function Chip({
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        "h-10 rounded-[12px] border-2 px-3 text-sm font-semibold transition-colors",
+        "h-8 rounded-lg border px-2.5 text-xs font-semibold transition-colors",
         selected
           ? "border-primary bg-nubia-light text-navy"
           : "border-border bg-white text-navy hover:border-primary/40"
@@ -69,8 +69,8 @@ export function LocationSelector({
     [...internationalGates, ...domesticGates].map((item) => item._id)
   );
   const gateGroups = [
-    { label: "International", items: internationalGates },
-    { label: "Domestic", items: domesticGates },
+    { label: "Олон улсын", items: internationalGates },
+    { label: "Дотоод", items: domesticGates },
     {
       label: "Бусад",
       items: gates.filter((item) => !groupedGateIds.has(item._id)),
@@ -97,41 +97,40 @@ export function LocationSelector({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
           aria-pressed={locationType === "checkin"}
           onClick={() => chooseType("checkin")}
           className={cn(
-            "flex min-h-[110px] flex-col items-center justify-center gap-2 rounded-[16px] border-2 p-4",
+            "flex h-11 items-center justify-center gap-2 rounded-xl border-2",
             locationType === "checkin"
               ? "border-primary bg-nubia-light"
               : "border-border bg-white"
           )}
         >
-          <MonitorSmartphone className="size-8 text-primary" />
-          <span className="text-base font-semibold text-navy">Check-in</span>
+          <MonitorSmartphone className="size-4 text-primary" />
+          <span className="text-sm font-semibold text-navy">Check-in</span>
         </button>
         <button
           type="button"
           aria-pressed={locationType === "gate"}
           onClick={() => chooseType("gate")}
           className={cn(
-            "flex min-h-[110px] flex-col items-center justify-center gap-2 rounded-[16px] border-2 p-4",
+            "flex h-11 items-center justify-center gap-2 rounded-xl border-2",
             locationType === "gate"
               ? "border-primary bg-nubia-light"
               : "border-border bg-white"
           )}
         >
-          <Plane className="size-8 text-primary" />
-          <span className="text-base font-semibold text-navy">Gate</span>
+          <Plane className="size-4 text-primary" />
+          <span className="text-sm font-semibold text-navy">Gate</span>
         </button>
       </div>
 
       {locationType === "checkin" ? (
-        <div className="space-y-3">
-          <span className="text-sm font-medium text-navy">Бүртгэлийн цэгүүд</span>
+        <div className="space-y-2">
           {checkinGroups.map((group) => (
             <div key={group.label} className="space-y-2">
               <div className="text-xs font-medium text-muted-foreground">
@@ -154,7 +153,7 @@ export function LocationSelector({
       ) : null}
 
       {locationType === "gate" ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {gateGroups.map((group) => (
             <div key={group.label} className="space-y-2">
               <div className="text-xs font-medium text-muted-foreground">

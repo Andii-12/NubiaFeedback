@@ -19,12 +19,12 @@ export function EngineerRating({
             key={star}
             type="button"
             onClick={() => onChange(star)}
-            className="grid size-12 place-items-center rounded-full hover:bg-nubia-light"
+            className="grid size-10 place-items-center rounded-full hover:bg-nubia-light"
             aria-label={`${star} од`}
           >
             <Star
               className={cn(
-                "size-8",
+                "size-7",
                 star <= value
                   ? "fill-amber-400 text-amber-400"
                   : "text-border"

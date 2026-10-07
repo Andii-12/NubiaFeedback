@@ -16,16 +16,16 @@ import type {
 export const DEVICES: {
   value: DeviceType;
   label: string;
-  hint: string;
+  hint?: string;
 }[] = [
-  { value: "OCR", label: "Keyboard / Swipe", hint: "Keyboard / Swipe" },
+  { value: "OCR", label: "Keyboard / Swipe" },
   { value: "BGR", label: "BGR", hint: "Barcode уншигч" },
-  { value: "WS", label: "Computer", hint: "Computer" },
-  { value: "BTP", label: "BTP (Ачааны пайз хэвлэгч)", hint: "Ачааны пайз хэвлэгч" },
-  { value: "BPP", label: "BPP (Суугчийн талон хэвлэгч)", hint: "Суугчийн талон хэвлэгч" },
-  { value: "DCP", label: "DCP (Жагсаалт хэвлэгч)", hint: "Жагсаалт хэвлэгч" },
-  { value: "Network", label: "Network (Сүлжээ)", hint: "Сүлжээ" },
-  { value: "Other", label: "Бусад", hint: "Бусад төхөөрөмж, Mouse, Monitor" },
+  { value: "WS", label: "Computer" },
+  { value: "BTP", label: "BTP", hint: "Ачааны пайз хэвлэгч" },
+  { value: "BPP", label: "BPP", hint: "Суугчийн талон хэвлэгч" },
+  { value: "DCP", label: "DCP", hint: "Жагсаалт хэвлэгч" },
+  { value: "Network", label: "Network", hint: "Сүлжээ" },
+  { value: "Other", label: "Бусад", hint: "Mouse, Monitor" },
 ];
 
 export const SHIFTS: { value: Shift; label: string }[] = [

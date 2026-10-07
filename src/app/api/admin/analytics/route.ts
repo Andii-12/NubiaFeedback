@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/api-auth";
 import { previousRange, rangeToDates } from "@/lib/date-range";
 import { percentChange } from "@/lib/utils";
 import { readLocations } from "@/lib/feedback-map";
+import { dutyNamesForDates } from "@/lib/duty-names";
 
 function populatedName(value: unknown, fallback = "Unknown") {
   if (value && typeof value === "object" && "name" in value) {
@@ -33,12 +34,15 @@ export async function GET(request: Request) {
     date: { $gte: prev.from, $lte: prev.to },
   });
 
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterdayDate = new Date();
-  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-  const yesterday = yesterdayDate.toISOString().slice(0, 10);
-  const todayItems = await Feedback.find({ date: today });
-  const yesterdayItems = await Feedback.find({ date: yesterday });
+  const { from: today } = rangeToDates("today");
+  const todayCount = current.filter((item) => item.date === today).length;
+  const latestDocs = await Feedback.find()
+    .populate("airlineId", "name")
+    .populate("locationId", "name")
+    .populate("locationIds", "name")
+    .sort({ createdAt: -1 })
+    .limit(8);
+  const onDuty = await dutyNamesForDates(latestDocs.map((item) => item.date));
 
   const issueCount = (items: typeof current) =>
     items.filter((i) => i.technicalAnswers.deviceStatus !== "normal").length;
@@ -90,41 +94,36 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     overview: {
-      today: todayItems.length,
-      todayChange: percentChange(todayItems.length, yesterdayItems.length),
-      issues: issueCount(todayItems),
-      issuesChange: percentChange(issueCount(todayItems), issueCount(yesterdayItems)),
-      rating: avgRating(todayItems),
-      ratingChange: percentChange(avgRating(todayItems) * 10, avgRating(yesterdayItems) * 10),
-      critical: critical(todayItems),
-      criticalChange: percentChange(critical(todayItems), critical(yesterdayItems)),
-      latest: current
-        .slice()
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt as Date).getTime() -
-            new Date(a.createdAt as Date).getTime()
-        )
-        .slice(0, 8)
-        .map((item) => {
+      total: current.length,
+      totalChange: percentChange(current.length, previous.length),
+      today: todayCount,
+      issues: issueCount(current),
+      issuesChange: percentChange(issueCount(current), issueCount(previous)),
+      rating: avgRating(current),
+      ratingChange: percentChange(avgRating(current), avgRating(previous)),
+      critical: critical(current),
+      criticalChange: percentChange(critical(current), critical(previous)),
+      latest: latestDocs.map((item) => {
           const places = readLocations(item);
           return {
-          _id: String(item._id),
-          requestId: item.requestId,
-          time: item.time,
-          date: item.date,
-          airlineName: populatedName(item.airlineId, ""),
-          locationName: places.locations
-            .map((place) => place.name)
-            .filter(Boolean)
-            .join(", "),
-          locationTypes: places.types,
-          locationType: places.types[0] || item.locationType,
-          devices: item.devices,
-          status: item.technicalAnswers.deviceStatus,
-          rating: item.engineerRating,
-          resolved: item.engineerAnswers.fullyResolved,
-        };
+            _id: String(item._id),
+            requestId: item.requestId,
+            time: item.time,
+            date: item.date,
+            airlineName: populatedName(item.airlineId, ""),
+            locationName: places.locations
+              .map((place) => place.name)
+              .filter(Boolean)
+              .join(", "),
+            locationTypes: places.types,
+            locationType: places.types[0] || item.locationType,
+            devices: item.devices,
+            status: item.technicalAnswers.deviceStatus,
+            deviceAnswers: item.technicalAnswers.deviceAnswers || [],
+            rating: item.engineerRating,
+            resolved: item.engineerAnswers.fullyResolved,
+            dutyEngineers: onDuty.get(item.date) || [],
+          };
         }),
     },
     devices: Object.entries(deviceMap).map(([name, count]) => ({ name, count })),

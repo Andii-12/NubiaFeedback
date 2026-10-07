@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 
+type DutyDay = {
+  date: string;
+  engineers: string[];
+};
+
 type Report = {
   month?: string;
   total: number;
@@ -12,6 +17,7 @@ type Report = {
   averageEngineerScore: number;
   topIssueCategory: string;
   resolvedPercent: number;
+  duties?: DutyDay[];
 };
 
 export default function ReportsPage() {
@@ -84,6 +90,29 @@ function ReportCard({
         <Stat label="Top issue category" value={report.topIssueCategory} />
         <Stat label="Resolved percentage" value={`${report.resolvedPercent}%`} />
       </div>
+      {report.duties?.length ? (
+        <div className="mt-5">
+          <h3 className="text-sm font-semibold text-navy">Тухайн өдрийн инженер</h3>
+          <div className="mt-2 overflow-hidden rounded-[14px] border border-border">
+            <table className="w-full text-sm">
+              <thead className="bg-nubia-light text-left text-xs text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 font-medium">Огноо</th>
+                  <th className="px-3 py-2 font-medium">Гарсан инженер</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.duties.map((day) => (
+                  <tr key={day.date} className="border-t border-border">
+                    <td className="px-3 py-2 font-medium text-navy">{day.date}</td>
+                    <td className="px-3 py-2 text-navy">{day.engineers.join(", ")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

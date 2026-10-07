@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import { Engineer, Feedback } from "@/lib/models";
 import { canWrite, getSessionUser } from "@/lib/api-auth";
 import { toFeedbackDTO } from "@/lib/feedback-map";
+import { dutyNamesForDates } from "@/lib/duty-names";
 
 export async function GET(
   _request: Request,
@@ -18,7 +19,11 @@ export async function GET(
     .populate("locationIds", "name code type")
     .populate("engineerId", "name");
   if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json({ item: toFeedbackDTO(row.toObject()) });
+  const item = toFeedbackDTO(row.toObject());
+  const onDuty = await dutyNamesForDates([item.date]);
+  return NextResponse.json({
+    item: { ...item, dutyEngineers: onDuty.get(item.date) || [] },
+  });
 }
 
 export async function PATCH(
@@ -53,7 +58,11 @@ export async function PATCH(
     .populate("locationId", "name code type")
     .populate("locationIds", "name code type")
     .populate("engineerId", "name");
-  return NextResponse.json({ item: toFeedbackDTO(populated!.toObject()) });
+  const item = toFeedbackDTO(populated!.toObject());
+  const onDuty = await dutyNamesForDates([item.date]);
+  return NextResponse.json({
+    item: { ...item, dutyEngineers: onDuty.get(item.date) || [] },
+  });
 }
 
 export async function DELETE(

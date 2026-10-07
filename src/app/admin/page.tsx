@@ -1,15 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { StatsCard } from "@/components/admin/StatsCard";
 import { FeedbackTable } from "@/components/admin/FeedbackTable";
 import type { FeedbackDTO } from "@/types";
 
 export default function AdminDashboardPage() {
+  const [onDuty, setOnDuty] = useState<{
+    today: string;
+    names: string[];
+    expired: boolean;
+  } | null>(null);
   const [data, setData] = useState<{
+    total: number;
+    totalChange: number;
     today: number;
-    todayChange: number;
     issues: number;
     issuesChange: number;
     rating: number;
@@ -27,8 +34,10 @@ export default function AdminDashboardPage() {
       locationTypes?: ("checkin" | "gate")[];
       devices: FeedbackDTO["devices"];
       status: string;
+      deviceAnswers?: FeedbackDTO["technicalAnswers"]["deviceAnswers"];
       rating: number;
       resolved: string;
+      dutyEngineers?: string[];
     }[];
   } | null>(null);
 
@@ -37,6 +46,22 @@ export default function AdminDashboardPage() {
       .then(async (r) => (r.ok ? r.json() : null))
       .then((json) => setData(json?.overview || null))
       .catch(() => setData(null));
+    fetch("/api/admin/engineers/schedule")
+      .then(async (r) => (r.ok ? r.json() : null))
+      .then((json) =>
+        setOnDuty(
+          json
+            ? {
+                today: json.today || "",
+                names: (json.todayEngineers || []).map(
+                  (engineer: { name: string }) => engineer.name
+                ),
+                expired: Boolean(json.expired),
+              }
+            : null
+        )
+      )
+      .catch(() => setOnDuty(null));
   }, []);
 
   const latest: FeedbackDTO[] =
@@ -59,6 +84,7 @@ export default function AdminDashboardPage() {
       technicalAnswers: {
         deviceStatus: item.status as FeedbackDTO["technicalAnswers"]["deviceStatus"],
         impactLevel: "low",
+        deviceAnswers: item.deviceAnswers,
       },
       engineerAnswers: {
         responseSpeed: "fast",
@@ -68,25 +94,43 @@ export default function AdminDashboardPage() {
         explanationQuality: "clear",
       },
       engineerRating: item.rating,
+      dutyEngineers: item.dutyEngineers || [],
       adminNotes: [],
       createdAt: "",
       updatedAt: "",
     })) || [];
 
   return (
-    <AdminShell title="Dashboard">
+    <AdminShell title="Самбар">
+      <div className="mb-4 rounded-[16px] border border-border bg-white px-4 py-3">
+        <div className="text-sm text-muted-foreground">
+          Өнөөдрийн инженер {onDuty?.today ? `· ${onDuty.today}` : ""}
+        </div>
+        <div className="mt-1 text-lg font-semibold text-navy">
+          {onDuty?.names.length
+            ? onDuty.names.join(", ")
+            : onDuty?.expired
+              ? "Цагийн хуваарийн хугацаа дууссан"
+              : "Хуваарьт инженер алга"}
+        </div>
+        {onDuty && !onDuty.names.length ? (
+          <Link href="/admin/engineers" className="mt-2 inline-block text-sm font-medium text-primary">
+            Add timesheet
+          </Link>
+        ) : null}
+      </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatsCard
-          label="Өнөөдрийн хариулт"
-          value={data?.today ?? "—"}
-          change={data?.todayChange}
-          hint="өчигдөртэй харьцуулахад"
+          label="Энэ сарын хариулт"
+          value={data?.total ?? "—"}
+          change={data?.totalChange}
+          hint={data ? `өнөөдөр ${data.today} · өмнөх үетэй` : "өмнөх үетэй"}
         />
         <StatsCard
           label="Техникийн асуудал"
           value={data?.issues ?? "—"}
           change={data?.issuesChange}
-          hint="normal биш төхөөрөмж"
+          hint="хэвийн бус төхөөрөмж"
         />
         <StatsCard
           label="Инженерийн дундаж үнэлгээ"
@@ -94,13 +138,13 @@ export default function AdminDashboardPage() {
           change={data?.ratingChange}
         />
         <StatsCard
-          label="Critical Issues"
+          label="Ноцтой асуудал"
           value={data?.critical ?? "—"}
           change={data?.criticalChange}
         />
       </div>
       <div className="mt-6 rounded-[16px] border border-border bg-white p-4">
-        <h2 className="mb-3 text-base font-semibold text-navy">Latest responses</h2>
+        <h2 className="mb-3 text-base font-semibold text-navy">Сүүлийн хариултууд</h2>
         <FeedbackTable items={latest} />
       </div>
     </AdminShell>
