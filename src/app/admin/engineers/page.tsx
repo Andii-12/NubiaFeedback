@@ -232,7 +232,7 @@ export default function EngineersPage() {
         />
         <input
           className="h-10 rounded-lg border px-3"
-          placeholder="Email"
+          placeholder="Ажлын имэйл"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -251,7 +251,7 @@ export default function EngineersPage() {
             className="rounded-[16px] border border-border bg-white p-5"
           >
             <div className="text-lg font-semibold text-navy">{item.name}</div>
-            <div className="text-xs text-muted-foreground">{item.email}</div>
+            <WorkEmail id={item._id} email={item.email || ""} onSaved={load} />
             <div className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Average Rating</span>
@@ -290,5 +290,54 @@ export default function EngineersPage() {
         ))}
       </div>
     </AdminShell>
+  );
+}
+
+function WorkEmail({
+  id,
+  email,
+  onSaved,
+}: {
+  id: string;
+  email: string;
+  onSaved: () => void;
+}) {
+  const [value, setValue] = useState(email);
+
+  async function save() {
+    const next = value.trim();
+    if (next && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(next)) {
+      toast.error("Ажлын имэйл буруу байна");
+      return;
+    }
+    const res = await fetch(`/api/admin/engineers/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: next }),
+    });
+    if (!res.ok) {
+      toast.error("Имэйл хадгалж чадсангүй");
+      return;
+    }
+    toast.success("Ажлын имэйл хадгаллаа");
+    onSaved();
+  }
+
+  return (
+    <div className="mt-2 flex gap-2">
+      <input
+        className="h-9 min-w-0 flex-1 rounded-lg border px-2 text-sm"
+        placeholder="Ажлын имэйл"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+      <button
+        type="button"
+        onClick={save}
+        className="h-9 rounded-lg border px-2 text-xs font-medium text-navy"
+      >
+        Хадгалах
+      </button>
+    </div>
   );
 }

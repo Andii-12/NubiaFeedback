@@ -4,6 +4,8 @@ import { Engineer, Feedback } from "@/lib/models";
 import { canWrite, getSessionUser } from "@/lib/api-auth";
 import { toFeedbackDTO } from "@/lib/feedback-map";
 import { dutyNamesForDates } from "@/lib/duty-names";
+import { labels } from "@/lib/labels";
+import { sendWorkMail } from "@/lib/mail";
 
 export async function GET(
   _request: Request,
@@ -41,17 +43,71 @@ export async function PATCH(
   const row = await Feedback.findById(id);
   if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (body.note) {
-    row.adminNotes.push({
-      text: String(body.note),
-      author: user.name || user.email,
-      createdAt: new Date(),
+  const note = String(body.note || "").trim();
+  if (!note) {
+    return NextResponse.json({ error: "Тэмдэглэл бичнэ үү." }, { status: 400 });
+  }
+  const engineer = await Engineer.findById(body.engineerId);
+  const to = engineer?.email?.trim() || "";
+  if (!engineer || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+    return NextResponse.json(
+      { error: "Ажлын имэйлтэй инженер сонгоно уу." },
+      { status: 400 }
+    );
+  }
+
+  await row.populate([
+    { path: "airlineId", select: "name code" },
+    { path: "locationId", select: "name code type" },
+    { path: "locationIds", select: "name code type" },
+  ]);
+  const preview = toFeedbackDTO(row.toObject());
+  const lines = [
+    `Сайн байна уу, ${engineer.name}`,
+    "",
+    note,
+    "",
+    `Дугаар: ${preview.requestId}`,
+    `Огноо: ${preview.date} ${preview.time}`,
+    `Авиакомпани: ${preview.airlineName || "—"}`,
+    `Байршил: ${preview.locationName || "—"}`,
+    `Төхөөрөмж: ${labels.devices(preview.devices)}`,
+    `Ажиллагаа: ${labels.deviceReport(preview.technicalAnswers.deviceAnswers, preview.technicalAnswers.deviceStatus)}`,
+    `Үнэлгээ: ${preview.engineerRating} / 5`,
+  ];
+  if (preview.comment) lines.push(`Сэтгэгдэл: ${preview.comment}`);
+  lines.push("", `Илгээсэн: ${user.name || user.email}`);
+  const text = lines.join("\n");
+
+  try {
+    await sendWorkMail({
+      to,
+      subject: `NUBIA Feedback ${preview.requestId}`,
+      text,
     });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message === "SMTP_NOT_CONFIGURED") {
+      return NextResponse.json(
+        {
+          error:
+            "Ажлын имэйл илгээх тохиргоо алга. .env дээр SMTP_HOST, SMTP_USER, SMTP_PASS нэмнэ үү.",
+        },
+        { status: 503 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Имэйл илгээж чадсангүй. SMTP тохиргоогоо шалгана уу." },
+      { status: 502 }
+    );
   }
-  if (body.engineerId) {
-    const engineer = await Engineer.findById(body.engineerId);
-    if (engineer) row.engineerId = engineer._id;
-  }
+
+  row.adminNotes.push({
+    text: note,
+    author: `${user.name || user.email} → ${to}`,
+    createdAt: new Date(),
+  });
+  row.engineerId = engineer._id;
   await row.save();
   const populated = await Feedback.findById(id)
     .populate("airlineId", "name code")

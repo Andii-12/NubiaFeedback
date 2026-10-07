@@ -13,6 +13,7 @@ export default function ResponseDetailPage() {
   const [engineers, setEngineers] = useState<EngineerDTO[]>([]);
   const [note, setNote] = useState("");
   const [engineerId, setEngineerId] = useState("");
+  const [sending, setSending] = useState(false);
 
   async function load() {
     const res = await fetch(`/api/admin/feedback/${params.id}`);
@@ -28,18 +29,31 @@ export default function ResponseDetailPage() {
       .then((d) => setEngineers(d.engineers || []));
   }, [params.id]);
 
-  async function saveNote() {
+  const selected = engineers.find((eng) => eng._id === engineerId);
+
+  async function sendMail() {
+    if (!engineerId || !selected?.email) {
+      toast.error("Ажлын имэйлтэй инженер сонгоно уу.");
+      return;
+    }
+    if (!note.trim()) {
+      toast.error("Илгээх тэмдэглэл бичнэ үү.");
+      return;
+    }
+    setSending(true);
     const res = await fetch(`/api/admin/feedback/${params.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ note, engineerId }),
     });
+    const data = await res.json().catch(() => ({}));
+    setSending(false);
     if (!res.ok) {
-      toast.error("Хадгалж чадсангүй");
+      toast.error(data.error || "Имэйл илгээж чадсангүй");
       return;
     }
     setNote("");
-    toast.success("Хадгаллаа");
+    toast.success(`${selected.email} руу илгээлээ`);
     load();
   }
 
@@ -148,13 +162,19 @@ export default function ResponseDetailPage() {
               value={engineerId}
               onChange={(e) => setEngineerId(e.target.value)}
             >
-              <option value="">Unassigned</option>
+              <option value="">Инженер сонгох</option>
               {engineers.map((eng) => (
                 <option key={eng._id} value={eng._id}>
                   {eng.name}
+                  {eng.email ? ` · ${eng.email}` : " · имэйл алга"}
                 </option>
               ))}
             </select>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {selected?.email
+                ? `Ажлын имэйл: ${selected.email}`
+                : "Ажлын имэйлтэй инженер сонгоно уу."}
+            </p>
           </div>
           <div className="rounded-[16px] border border-border bg-white p-5">
             <h3 className="mb-3 font-semibold text-navy">Admin notes</h3>
@@ -171,16 +191,17 @@ export default function ResponseDetailPage() {
             <textarea
               className="w-full rounded-lg border p-2 text-sm"
               rows={4}
-              placeholder="Follow-up required for OCR at A12."
+              placeholder="Инженерт илгээх тэмдэглэл"
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
             <button
               type="button"
-              onClick={saveNote}
-              className="mt-3 h-10 w-full rounded-lg bg-primary text-white"
+              onClick={sendMail}
+              disabled={sending || !selected?.email || !note.trim()}
+              className="mt-3 h-10 w-full rounded-lg bg-primary text-white disabled:opacity-60"
             >
-              Save note
+              {sending ? "Илгээж байна..." : "Send mail"}
             </button>
           </div>
         </div>
