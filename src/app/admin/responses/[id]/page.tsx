@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { labels } from "@/lib/labels";
+import { useI18n, useLabels } from "@/components/i18n/LocaleProvider";
 import type { EngineerDTO, FeedbackDTO } from "@/types";
 import { toast } from "sonner";
 
@@ -14,6 +14,8 @@ export default function ResponseDetailPage() {
   const [note, setNote] = useState("");
   const [engineerId, setEngineerId] = useState("");
   const [sending, setSending] = useState(false);
+  const { t } = useI18n();
+  const labels = useLabels();
 
   async function load() {
     const res = await fetch(`/api/admin/feedback/${params.id}`);
@@ -59,8 +61,8 @@ export default function ResponseDetailPage() {
 
   if (!item) {
     return (
-      <AdminShell title="Response">
-        <div>Уншиж байна...</div>
+      <AdminShell title={t.nav.response}>
+        <div>{t.common.loading}</div>
       </AdminShell>
     );
   }

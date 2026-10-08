@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
+  const { t } = useI18n();
   const [publicUrl, setPublicUrl] = useState("");
   const [organization, setOrganization] = useState("NUBIA AIS");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -43,7 +45,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <AdminShell title="Settings">
+    <AdminShell title={t.nav.settings}>
       <div className="grid gap-4 xl:grid-cols-2">
         <div className="rounded-[16px] border bg-white p-5">
           <h2 className="mb-4 font-semibold text-navy">Platform</h2>

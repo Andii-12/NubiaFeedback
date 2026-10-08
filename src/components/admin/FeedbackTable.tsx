@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { labels } from "@/lib/labels";
+import { useI18n, useLabels } from "@/components/i18n/LocaleProvider";
 import type { FeedbackDTO } from "@/types";
 
 export function FeedbackTable({
@@ -24,6 +24,8 @@ export function FeedbackTable({
   sort?: string;
   onSort?: (sort: string) => void;
 }) {
+  const { t } = useI18n();
+  const labels = useLabels();
   function toggle(desc: string, asc: string) {
     if (!onSort) return;
     onSort(sort === desc ? asc : desc);
@@ -32,34 +34,34 @@ export function FeedbackTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Дугаар</TableHead>
-          <TableHead>Цаг</TableHead>
-          <TableHead>Авиакомпани</TableHead>
-          <TableHead>Байршил</TableHead>
-          <TableHead>Төрөл</TableHead>
-          <TableHead>Төхөөрөмж</TableHead>
-          <TableHead>Ажиллагаа</TableHead>
+          <TableHead>{t.table.id}</TableHead>
+          <TableHead>{t.table.time}</TableHead>
+          <TableHead>{t.table.airline}</TableHead>
+          <TableHead>{t.table.location}</TableHead>
+          <TableHead>{t.table.type}</TableHead>
+          <TableHead>{t.table.device}</TableHead>
+          <TableHead>{t.table.work}</TableHead>
           <TableHead>
             {onSort ? (
               <button type="button" onClick={() => toggle("rating_desc", "rating_asc")}>
-                Үнэлгээ{sort === "rating_desc" ? " ↓" : sort === "rating_asc" ? " ↑" : ""}
+                {t.table.rating}{sort === "rating_desc" ? " ↓" : sort === "rating_asc" ? " ↑" : ""}
               </button>
             ) : (
-              "Үнэлгээ"
+              t.table.rating
             )}
           </TableHead>
-          <TableHead>Шийдэгдсэн</TableHead>
+          <TableHead>{t.table.resolved}</TableHead>
           <TableHead>
             {onSort ? (
               <button type="button" onClick={() => toggle("date_desc", "date_asc")}>
-                Огноо{sort === "date_desc" ? " ↓" : sort === "date_asc" ? " ↑" : ""}
+                {t.table.date}{sort === "date_desc" ? " ↓" : sort === "date_asc" ? " ↑" : ""}
               </button>
             ) : (
-              "Огноо"
+              t.table.date
             )}
           </TableHead>
-          <TableHead>Өдрийн инженер</TableHead>
-          {onDelete ? <TableHead className="text-right">Үйлдэл</TableHead> : null}
+          <TableHead>{t.table.engineer}</TableHead>
+          {onDelete ? <TableHead className="text-right">{t.table.action}</TableHead> : null}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -69,7 +71,7 @@ export function FeedbackTable({
               colSpan={onDelete ? 12 : 11}
               className="py-8 text-center text-sm text-muted-foreground"
             >
-              Хариулт алга
+              {t.table.empty}
             </TableCell>
           </TableRow>
         ) : null}
@@ -115,7 +117,7 @@ export function FeedbackTable({
                   onClick={() => onDelete(item)}
                   className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
                 >
-                  Устгах
+                  {t.table.delete}
                 </button>
               </TableCell>
             ) : null}

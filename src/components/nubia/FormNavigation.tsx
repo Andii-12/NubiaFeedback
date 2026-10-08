@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import { cn } from "@/lib/utils";
 
 export function FormNavigation({
@@ -20,6 +21,7 @@ export function FormNavigation({
   loading?: boolean;
   disabled?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-white/95 px-4 py-3 backdrop-blur md:static md:mt-6 md:rounded-[16px] md:border md:px-4">
       <div className={cn("grid gap-2", showBack ? "grid-cols-2" : "grid-cols-1")}>
@@ -39,7 +41,7 @@ export function FormNavigation({
           disabled={disabled || loading}
           className="h-12 rounded-[14px] text-base"
         >
-          {loading ? "Илгээж байна..." : nextLabel}
+          {loading ? t.common.sending : nextLabel}
         </Button>
       </div>
     </div>

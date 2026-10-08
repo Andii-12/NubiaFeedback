@@ -1,26 +1,31 @@
+"use client";
+
 import Link from "next/link";
 import { NubiaLogo } from "@/components/nubia/NubiaLogo";
+import { LanguageSwitch, useI18n } from "@/components/i18n/LocaleProvider";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
+  const { t } = useI18n();
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface via-white to-nubia-light/30">
-      <header className="mx-auto flex max-w-3xl items-center px-4 py-6">
+      <header className="mx-auto flex max-w-3xl items-center justify-between px-4 py-6">
         <div className="transition-transform hover:scale-105">
           <NubiaLogo />
         </div>
+        <LanguageSwitch />
       </header>
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-8">
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <p className="mb-4 inline-flex rounded-full bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-1.5 text-xs font-semibold tracking-wide text-primary uppercase border border-primary/20">
-            New Ulaanbaatar International Airport
+            {t.home.airport}
           </p>
           <h1 className="text-5xl font-bold leading-tight text-navy md:text-6xl bg-gradient-to-br from-navy to-primary bg-clip-text text-transparent">
-            Ажилтны санал хүсэлт
+            {t.home.title}
           </h1>
           <p className="mt-6 max-w-xl text-2xl font-semibold leading-snug tracking-tight text-navy">
-            Таны санал. Бидний сайжруулалт.
+            {t.home.tagline}
           </p>
           <div className="mt-10">
             <Link
@@ -30,7 +35,7 @@ export default function HomePage() {
                 "h-20 w-full max-w-xl rounded-[18px] text-2xl font-semibold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02]"
               )}
             >
-              Санал өгөх
+              {t.home.cta}
             </Link>
           </div>
         </div>

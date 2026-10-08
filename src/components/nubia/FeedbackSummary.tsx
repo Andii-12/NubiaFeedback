@@ -1,15 +1,17 @@
 "use client";
 
-import { labels } from "@/lib/labels";
+import { useI18n, useLabels } from "@/components/i18n/LocaleProvider";
 import type { AirlineDTO, FeedbackFormState, LocationDTO } from "@/types";
 
 function Row({
   label,
   value,
+  editLabel,
   onEdit,
 }: {
   label: string;
   value: string;
+  editLabel: string;
   onEdit?: () => void;
 }) {
   return (
@@ -24,7 +26,7 @@ function Row({
           onClick={onEdit}
           className="text-sm font-medium text-primary"
         >
-          Засах
+          {editLabel}
         </button>
       ) : null}
     </div>
@@ -42,6 +44,8 @@ export function FeedbackSummary({
   locations: LocationDTO[];
   onEdit: (step: number) => void;
 }) {
+  const { t } = useI18n();
+  const labels = useLabels();
   const airline = airlines.find((a) => a._id === form.airlineId);
   const selected = locations.filter((item) => form.locationIds.includes(item._id));
   const checkinNames = selected
@@ -60,40 +64,47 @@ export function FeedbackSummary({
   return (
     <div className="rounded-[16px] border border-border bg-white p-4 shadow-sm">
       <Row
-        label="Авиакомпани"
+        label={t.form.airline}
+        editLabel={t.common.edit}
         value={airline?.name || ""}
         onEdit={() => onEdit(1)}
       />
       <Row
-        label="Байршил"
+        label={t.form.sumLocation}
+        editLabel={t.common.edit}
         value={locationLabel}
         onEdit={() => onEdit(1)}
       />
-      <Row label="Огноо" value={form.date} onEdit={() => onEdit(1)} />
+      <Row label={t.form.date} editLabel={t.common.edit} value={form.date} onEdit={() => onEdit(1)} />
       <Row
-        label="Төхөөрөмж"
+        label={t.form.sumDevice}
+        editLabel={t.common.edit}
         value={labels.devices(form.devices)}
         onEdit={() => onEdit(2)}
       />
       <Row
-        label="Ажиллагаа"
+        label={t.form.sumWork}
+        editLabel={t.common.edit}
         value={
           labels.deviceReport(form.deviceAnswers, form.deviceStatus) || "—"
         }
         onEdit={() => onEdit(2)}
       />
       <Row
-        label="Нөлөөлөл"
+        label={t.form.sumImpact}
+        editLabel={t.common.edit}
         value={labels.impact(form.impactLevel)}
         onEdit={() => onEdit(2)}
       />
       <Row
-        label="Хариу өгөх хурд"
+        label={t.form.sumSpeed}
+        editLabel={t.common.edit}
         value={labels.responseSpeed(form.responseSpeed)}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Хурдан шийдсэн эсэх"
+        label={t.form.sumFast}
+        editLabel={t.common.edit}
         value={[
           labels.resolutionSpeed(form.resolutionSpeed),
           form.resolutionNote,
@@ -103,31 +114,36 @@ export function FeedbackSummary({
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Бүрэн шийдэгдсэн эсэх"
+        label={t.form.sumFully}
+        editLabel={t.common.edit}
         value={[labels.fullyResolved(form.fullyResolved), form.resolvedNote]
           .filter(Boolean)
           .join(" · ")}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Харилцаа"
+        label={t.form.sumTalk}
+        editLabel={t.common.edit}
         value={[labels.communication(form.communication), form.communicationNote]
           .filter(Boolean)
           .join(" · ")}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Тайлбар"
+        label={t.form.sumExplain}
+        editLabel={t.common.edit}
         value={labels.explanation(form.explanationQuality)}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Үнэлгээ"
+        label={t.form.sumRating}
+        editLabel={t.common.edit}
         value={form.engineerRating ? `${form.engineerRating} / 5` : "—"}
         onEdit={() => onEdit(3)}
       />
       <Row
-        label="Сэтгэгдэл"
+        label={t.form.sumComment}
+        editLabel={t.common.edit}
         value={form.comment || "—"}
         onEdit={() => onEdit(4)}
       />

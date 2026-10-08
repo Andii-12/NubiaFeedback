@@ -6,9 +6,11 @@ import { FeedbackFormProvider } from "@/components/feedback/FeedbackFormProvider
 import { FeedbackWizard } from "@/components/feedback/FeedbackWizard";
 import type { FeedbackFormState, LocationType } from "@/types";
 import { Suspense } from "react";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 
 function FeedbackInner() {
   const params = useSearchParams();
+  const { t } = useI18n();
   const [prefill, setPrefill] = useState<Partial<FeedbackFormState>>();
   const [ready, setReady] = useState(false);
 
@@ -38,7 +40,7 @@ function FeedbackInner() {
 
   if (!ready) {
     return (
-      <div className="py-20 text-center text-muted-foreground">Уншиж байна...</div>
+      <div className="py-20 text-center text-muted-foreground">{t.common.loading}</div>
     );
   }
 
@@ -49,10 +51,15 @@ function FeedbackInner() {
   );
 }
 
+function FeedbackFallback() {
+  const { t } = useI18n();
+  return <div className="py-20 text-center">{t.common.loading}</div>;
+}
+
 export default function FeedbackPage() {
   return (
     <div className="min-h-screen bg-surface px-4 py-6">
-      <Suspense fallback={<div className="py-20 text-center">Уншиж байна...</div>}>
+      <Suspense fallback={<FeedbackFallback />}>
         <FeedbackInner />
       </Suspense>
     </div>

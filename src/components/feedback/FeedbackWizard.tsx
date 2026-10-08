@@ -31,6 +31,7 @@ import {
   answerFor,
   detailOptions,
   detailQuestion,
+  deviceDetailKind,
   deviceLabel,
   missingDeviceAnswer,
   orderedDevices,
@@ -39,11 +40,8 @@ import {
 } from "@/lib/device-answers";
 import { isCompleteDate, isOnOrBeforeToday } from "@/lib/date-parts";
 import { localTime, shiftFromHour } from "@/lib/utils";
-
-const YES_NO = [
-  { value: "yes" as const, label: "Тийм" },
-  { value: "no" as const, label: "Үгүй" },
-];
+import { LanguageSwitch, useI18n } from "@/components/i18n/LocaleProvider";
+import { optionLabel } from "@/lib/i18n/options";
 
 function communicationKind(value: string) {
   if (value === "excellent" || value === "good") return "praise";
@@ -51,11 +49,13 @@ function communicationKind(value: string) {
   return "";
 }
 
-function communicationPrompt(value: string) {
-  if (communicationKind(value) === "praise") return "Инженерт урамшууллын үг бичээрэй.";
-  if (communicationKind(value) === "explain") {
-    return "Яагаад ийм байсан бэ? Товч тайлбарлана уу.";
-  }
+function communicationPrompt(
+  value: string,
+  praise: string,
+  explain: string
+) {
+  if (communicationKind(value) === "praise") return praise;
+  if (communicationKind(value) === "explain") return explain;
   return "";
 }
 
@@ -70,17 +70,17 @@ function YesNoChoice({
   onChoose: (next: "yes" | "no") => void;
   onNote: (next: string) => void;
 }) {
+  const { t } = useI18n();
   const prompt =
-    value === "yes"
-      ? "Баярласнаа бичээрэй."
-      : value === "no"
-        ? "Яагаад?"
-        : "";
+    value === "yes" ? t.form.thanks : value === "no" ? t.form.why : "";
 
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
-        {YES_NO.map((item) => (
+        {[
+          { value: "yes" as const, label: t.common.yes },
+          { value: "no" as const, label: t.common.no },
+        ].map((item) => (
           <button
             key={item.value}
             type="button"
@@ -98,13 +98,13 @@ function YesNoChoice({
       {prompt ? (
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
-            {prompt} <span>(заавал биш)</span>
+            {prompt} <span>{t.common.optional}</span>
           </p>
           <textarea
             value={note}
             onChange={(event) => onNote(event.target.value.slice(0, 500))}
             rows={2}
-            placeholder="Энд бичнэ үү..."
+            placeholder={t.common.writeHere}
             className="w-full rounded-xl border border-border bg-white p-2.5 text-sm text-navy outline-none placeholder:text-muted-foreground focus:border-primary"
           />
         </div>
@@ -124,6 +124,7 @@ function pillClass(selected: boolean) {
 export function FeedbackWizard() {
   const router = useRouter();
   const { form, update, setForm, reset } = useFeedbackForm();
+  const { locale, t } = useI18n();
   const { airlines, locations, loading } = useCatalog();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -133,36 +134,40 @@ export function FeedbackWizard() {
 
   function validateStep(current: number) {
     if (current === 1) {
-      if (!form.airlineId) return "Airline сонгоно уу.";
-      if (form.locationTypes.length !== 1) return "Байршлын төрөл сонгоно уу.";
+      if (!form.airlineId) return t.form.errAirline;
+      if (form.locationTypes.length !== 1) return t.form.errType;
       const selected = locations.filter((item) =>
         form.locationIds.includes(item._id)
       );
       if (selected.length !== 1 || selected[0]?.type !== form.locationTypes[0]) {
         return form.locationTypes[0] === "checkin"
-          ? "Бүртгэлийн цэг сонгоно уу."
-          : "Gate сонгоно уу.";
+          ? t.form.errCheckin
+          : t.form.errGate;
       }
-      if (!isCompleteDate(form.date)) return "Он, сар, өдөр сонгоно уу.";
-      if (!isOnOrBeforeToday(form.date)) return "Ирээдүйн огноо сонгох боломжгүй.";
+      if (!isCompleteDate(form.date)) return t.form.errDate;
+      if (!isOnOrBeforeToday(form.date)) return t.form.errFuture;
     }
     if (current === 2) {
-      if (!form.devices.length) return "Төхөөрөмж сонгоно уу.";
-      const deviceMessage = missingDeviceAnswer(form.devices, form.deviceAnswers);
+      if (!form.devices.length) return t.form.errDevice;
+      const deviceMessage = missingDeviceAnswer(
+        form.devices,
+        form.deviceAnswers,
+        locale
+      );
       if (deviceMessage) return deviceMessage;
-      if (!form.impactLevel) return "Нөлөөллийн түвшинг сонгоно уу.";
+      if (!form.impactLevel) return t.form.errImpact;
     }
     if (current === 3) {
-      if (!form.responseSpeed) return "Хариу өгөх хурдыг сонгоно уу.";
+      if (!form.responseSpeed) return t.form.errSpeed;
       if (form.resolutionSpeed !== "yes" && form.resolutionSpeed !== "no") {
-        return "Шийдвэрлэлтийг сонгоно уу.";
+        return t.form.errResolution;
       }
       if (form.fullyResolved !== "yes" && form.fullyResolved !== "no") {
-        return "Шийдэгдсэн эсэхийг сонгоно уу.";
+        return t.form.errFully;
       }
-      if (!form.communication) return "Харилцааны үнэлгээг сонгоно уу.";
-      if (!form.explanationQuality) return "Тайлбарын үнэлгээг сонгоно уу.";
-      if (!form.engineerRating) return "Инженерийн үнэлгээг сонгоно уу.";
+      if (!form.communication) return t.form.errTalk;
+      if (!form.explanationQuality) return t.form.errExplain;
+      if (!form.engineerRating) return t.form.errRating;
     }
     return "";
   }
@@ -199,7 +204,7 @@ export function FeedbackWizard() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Илгээхэд алдаа гарлаа.");
+        throw new Error(data.error || t.form.errSend);
       }
       reset();
       const params = new URLSearchParams({
@@ -210,41 +215,39 @@ export function FeedbackWizard() {
       });
       router.push(`/feedback/success?${params.toString()}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Илгээхэд алдаа гарлаа.");
+      toast.error(err instanceof Error ? err.message : t.form.errSend);
     } finally {
       setSubmitting(false);
     }
   }
 
   const title = useMemo(() => {
-    if (step === 1) return "Үндсэн мэдээлэл";
-    if (step === 2) return "Техникийн асуултууд";
-    if (step === 3) return "Инженерийн үйлчилгээний үнэлгээ";
-    if (step === 4) return "Нэмэлт сэтгэгдэл";
-    return "Хяналт";
-  }, [step]);
+    if (step === 1) return t.form.basic;
+    if (step === 2) return t.form.technical;
+    if (step === 3) return t.form.engineer;
+    if (step === 4) return t.form.comment;
+    return t.form.check;
+  }, [step, t]);
 
   const subtitle = useMemo(() => {
-    if (step === 1) return "Таны санал бидний сайжруулалтад чухал.";
-    if (step === 4) return "Нэмэлт санал, гомдол байвал бичээрэй. Заавал биш.";
-    if (step === 5) return "Илгээхээсээ өмнө мэдээллээ шалгана уу.";
+    if (step === 1) return t.form.basicSub;
+    if (step === 4) return t.form.commentSub;
+    if (step === 5) return t.form.checkSub;
     return "";
-  }, [step]);
+  }, [step, t]);
 
   return (
     <div className="mx-auto w-full max-w-lg pb-28 md:pb-8">
       <header className="mb-3 flex items-center justify-between">
         <NubiaLogo />
-        <span className="rounded-full bg-nubia-light px-3 py-1 text-xs font-medium text-primary">
-          NUBIA AIS
-        </span>
+        <LanguageSwitch />
       </header>
       <ProgressStepper step={displayStep} />
       <div className="mt-3">
         {step === 1 ? (
           <>
             <h1 className="text-xl font-semibold leading-tight text-navy">
-              Сайн байна уу
+              {t.form.hello}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           </>
@@ -275,14 +278,14 @@ export function FeedbackWizard() {
         >
           {step === 1 && (
             <>
-              <QuestionCard title="Airline">
+              <QuestionCard title={t.form.airline}>
                 <select
                   className="h-10 w-full rounded-xl border border-border bg-white px-3 text-sm outline-none focus:border-primary"
                   value={form.airlineId}
                   onChange={(e) => update("airlineId", e.target.value)}
                   disabled={loading}
                 >
-                  <option value="">Airline сонгоно уу</option>
+                  <option value="">{t.form.airlinePh}</option>
                   {airlines.map((airline) => (
                     <option key={airline._id} value={airline._id}>
                       {airline.name}
@@ -290,7 +293,7 @@ export function FeedbackWizard() {
                   ))}
                 </select>
               </QuestionCard>
-              <QuestionCard title="Байршлын төрөл">
+              <QuestionCard title={t.form.locationType}>
                 <LocationSelector
                   locationTypes={form.locationTypes}
                   locationIds={form.locationIds}
@@ -312,8 +315,8 @@ export function FeedbackWizard() {
                 />
               </QuestionCard>
               <QuestionCard
-                title="Огноо"
-                subtitle="Асуудал гарсан он, сар, өдрийг сонгоно уу."
+                title={t.form.date}
+                subtitle={t.form.dateHint}
               >
                 <DateSelector
                   value={form.date}
@@ -325,7 +328,7 @@ export function FeedbackWizard() {
 
           {step === 2 && (
             <>
-              <QuestionCard title="Ямар төхөөрөмж дээр асуудал гарсан бэ?">
+              <QuestionCard title={t.form.whichDevice}>
                 <DeviceSelector
                   value={form.devices}
                   showBgr={form.locationTypes.includes("gate")}
@@ -342,7 +345,7 @@ export function FeedbackWizard() {
                 const answer = answerFor(form.deviceAnswers, device);
                 const details = detailOptions(device);
                 return (
-                  <QuestionCard key={device} title={deviceLabel(device)}>
+                  <QuestionCard key={device} title={deviceLabel(device, locale)}>
                     <div className="grid grid-cols-3 gap-1.5">
                       {DEVICE_STATUS.map((item) => (
                         <button
@@ -364,14 +367,14 @@ export function FeedbackWizard() {
                               : "border-border bg-white text-navy"
                           }`}
                         >
-                          {item.label}
+                          {optionLabel(locale, "status", item.value)}
                         </button>
                       ))}
                     </div>
                     {details.length ? (
                       <div className="mt-3 space-y-1.5">
                         <p className="text-xs text-muted-foreground">
-                          {detailQuestion(device)}
+                          {detailQuestion(device, locale)}
                         </p>
                         <div className="flex flex-wrap gap-1.5">
                           {details.map((item) => (
@@ -390,7 +393,15 @@ export function FeedbackWizard() {
                               }
                               className={pillClass(answer.detail === item.value)}
                             >
-                              {item.label}
+                              {optionLabel(
+                                locale,
+                                deviceDetailKind(device) === "print"
+                                  ? "print"
+                                  : deviceDetailKind(device) === "scan"
+                                    ? "scan"
+                                    : "work",
+                                item.value
+                              )}
                             </button>
                           ))}
                         </div>
@@ -399,7 +410,7 @@ export function FeedbackWizard() {
                   </QuestionCard>
                 );
               })}
-              <QuestionCard title="Асуудал ажлын үйл ажиллагаанд хэр нөлөөлсөн бэ?">
+              <QuestionCard title={t.form.impact}>
                 <div className="space-y-2">
                   {IMPACT_LEVELS.map((item) => (
                     <ChoiceChip
@@ -407,7 +418,7 @@ export function FeedbackWizard() {
                       selected={form.impactLevel === item.value}
                       onClick={() => update("impactLevel", item.value)}
                     >
-                      {item.label}
+                      {optionLabel(locale, "impact", item.value)}
                     </ChoiceChip>
                   ))}
                 </div>
@@ -417,7 +428,7 @@ export function FeedbackWizard() {
 
           {step === 3 && (
             <>
-              <QuestionCard title="Инженер дуудлагад хэр хурдан хариу өгсөн бэ?">
+              <QuestionCard title={t.form.speed}>
                 <div className="flex flex-wrap gap-1.5">
                   {RESPONSE_SPEED.map((item) => (
                     <button
@@ -426,12 +437,12 @@ export function FeedbackWizard() {
                       onClick={() => update("responseSpeed", item.value)}
                       className={pillClass(form.responseSpeed === item.value)}
                     >
-                      {item.label}
+                      {optionLabel(locale, "speed", item.value)}
                     </button>
                   ))}
                 </div>
               </QuestionCard>
-              <QuestionCard title="Инженер асуудлыг хурдан шийдвэрлэж чадсан уу?">
+              <QuestionCard title={t.form.resolvedFast}>
                 <YesNoChoice
                   value={form.resolutionSpeed}
                   note={form.resolutionNote}
@@ -446,7 +457,7 @@ export function FeedbackWizard() {
                   onNote={(resolutionNote) => update("resolutionNote", resolutionNote)}
                 />
               </QuestionCard>
-              <QuestionCard title="Асуудал бүрэн шийдэгдсэн үү?">
+              <QuestionCard title={t.form.fully}>
                 <YesNoChoice
                   value={form.fullyResolved}
                   note={form.resolvedNote}
@@ -461,7 +472,7 @@ export function FeedbackWizard() {
                   onNote={(resolvedNote) => update("resolvedNote", resolvedNote)}
                 />
               </QuestionCard>
-              <QuestionCard title="Инженерийн харилцаа, хандлага ямар байсан бэ?">
+              <QuestionCard title={t.form.communication}>
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-2">
                     {COMMUNICATION.map((item) => (
@@ -486,15 +497,17 @@ export function FeedbackWizard() {
                         }`}
                       >
                         <span className="text-lg leading-none">{item.emoji}</span>
-                        <span className="mt-1 text-xs font-semibold">{item.label}</span>
+                        <span className="mt-1 text-xs font-semibold">
+                          {optionLabel(locale, "communication", item.value)}
+                        </span>
                       </button>
                     ))}
                   </div>
-                  {communicationPrompt(form.communication) ? (
+                  {communicationPrompt(form.communication, t.form.praise, t.form.explain) ? (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        {communicationPrompt(form.communication)}{" "}
-                        <span>(заавал биш)</span>
+                        {communicationPrompt(form.communication, t.form.praise, t.form.explain)}{" "}
+                        <span>{t.common.optional}</span>
                       </p>
                       <textarea
                         value={form.communicationNote}
@@ -502,14 +515,14 @@ export function FeedbackWizard() {
                           update("communicationNote", event.target.value.slice(0, 500))
                         }
                         rows={2}
-                        placeholder="Энд бичнэ үү..."
+                        placeholder={t.common.writeHere}
                         className="w-full rounded-xl border border-border bg-white p-2.5 text-sm text-navy outline-none placeholder:text-muted-foreground focus:border-primary"
                       />
                     </div>
                   ) : null}
                 </div>
               </QuestionCard>
-              <QuestionCard title="Инженерийн тайлбар ойлгомжтой байсан уу?">
+              <QuestionCard title={t.form.explanation}>
                 <div className="flex flex-wrap gap-1.5">
                   {EXPLANATION_QUALITY.map((item) => (
                     <button
@@ -518,12 +531,12 @@ export function FeedbackWizard() {
                       onClick={() => update("explanationQuality", item.value)}
                       className={pillClass(form.explanationQuality === item.value)}
                     >
-                      {item.label}
+                      {optionLabel(locale, "explanation", item.value)}
                     </button>
                   ))}
                 </div>
               </QuestionCard>
-              <QuestionCard title="Инженерийн үйлчилгээний ерөнхий үнэлгээ">
+              <QuestionCard title={t.form.rating}>
                 <EngineerRating
                   value={form.engineerRating}
                   onChange={(v) => update("engineerRating", v)}
@@ -557,7 +570,10 @@ export function FeedbackWizard() {
           setStep((s) => Math.max(1, s - 1));
         }}
         onNext={step === 5 ? submit : next}
-        nextLabel={step === 5 ? "Илгээх" : step === 4 ? "Хянах →" : "Үргэлжлүүлэх →"}
+        nextLabel={
+          step === 5 ? t.common.send : step === 4 ? t.common.review : t.common.continue
+        }
+        backLabel={t.common.back}
         loading={submitting}
       />
     </div>

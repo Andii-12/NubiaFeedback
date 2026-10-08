@@ -1,7 +1,8 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { ENGINEER_RATING_LABELS } from "@/lib/constants";
+import { useI18n } from "@/components/i18n/LocaleProvider";
+import { optionLabel } from "@/lib/i18n/options";
 import { cn } from "@/lib/utils";
 
 export function EngineerRating({
@@ -11,6 +12,7 @@ export function EngineerRating({
   value: number;
   onChange: (next: number) => void;
 }) {
+  const { locale, t } = useI18n();
   return (
     <div className="space-y-3">
       <div className="flex justify-center gap-2">
@@ -20,7 +22,7 @@ export function EngineerRating({
             type="button"
             onClick={() => onChange(star)}
             className="grid size-10 place-items-center rounded-full hover:bg-nubia-light"
-            aria-label={`${star} од`}
+            aria-label={`${star} ${t.form.star}`}
           >
             <Star
               className={cn(
@@ -34,7 +36,9 @@ export function EngineerRating({
         ))}
       </div>
       <p className="text-center text-sm font-medium text-navy">
-        {value ? `${value} / 5 · ${ENGINEER_RATING_LABELS[value]}` : "Үнэлгээ сонгоно уу"}
+        {value
+          ? `${value} / 5 · ${optionLabel(locale, "rating", String(value))}`
+          : t.form.pickRating}
       </p>
     </div>
   );

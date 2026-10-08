@@ -3,7 +3,7 @@
 import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
 import { useRef } from "react";
 import type { LocationDTO } from "@/types";
-import { labels } from "@/lib/labels";
+import { useLabels } from "@/components/i18n/LocaleProvider";
 import Link from "next/link";
 
 export function QRCodeCard({
@@ -14,6 +14,7 @@ export function QRCodeCard({
   baseUrl: string;
 }) {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const labels = useLabels();
   const url = `${baseUrl}/feedback?location=${encodeURIComponent(
     location.qrIdentifier
   )}&type=${location.type}`;

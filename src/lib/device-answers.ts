@@ -8,6 +8,7 @@ import {
   WS_DEVICES,
   WORKSTATION_STATUS,
 } from "@/lib/constants";
+import { line, optionLabel, type Locale } from "@/lib/i18n/options";
 import type { DeviceStatus, DeviceType } from "@/types";
 
 export type DeviceAnswer = {
@@ -33,17 +34,17 @@ export function deviceDetailKind(device: string): DeviceDetailKind | null {
   return null;
 }
 
-export function deviceLabel(device: string) {
-  return DEVICES.find((item) => item.value === device)?.label || device;
+export function deviceLabel(device: string, locale: Locale = "mn") {
+  return optionLabel(locale, "device", device);
 }
 
-export function detailQuestion(device: string) {
+export function detailQuestion(device: string, locale: Locale = "mn") {
   const kind = deviceDetailKind(device);
-  const name = deviceLabel(device);
-  if (kind === "print") return `${name} хэвлэлт ямар байсан бэ?`;
-  if (kind === "scan") return `${name} уншилт ямар байсан бэ?`;
-  if (device === "WS") return "Танай DCS систем ямар байсан бэ?";
-  if (kind === "workstation") return `${name} систем ямар байсан бэ?`;
+  const name = deviceLabel(device, locale);
+  if (kind === "print") return line(locale, "printQ", name);
+  if (kind === "scan") return line(locale, "scanQ", name);
+  if (device === "WS") return line(locale, "dcsQ");
+  if (kind === "workstation") return line(locale, "systemQ", name);
   return "";
 }
 
@@ -55,10 +56,11 @@ export function detailOptions(device: string) {
   return [];
 }
 
-export function detailLabel(device: string, value?: string) {
+export function detailLabel(device: string, value?: string, locale: Locale = "mn") {
   if (!value) return "";
-  if (deviceDetailKind(device) === "scan" && value === "slow") return "Удаан уншсан";
-  return detailOptions(device).find((item) => item.value === value)?.label || value;
+  const kind = deviceDetailKind(device);
+  const group = kind === "print" ? "print" : kind === "scan" ? "scan" : "work";
+  return optionLabel(locale, group, value);
 }
 
 export function orderedDevices(devices: string[]) {
@@ -92,19 +94,23 @@ export function upsertAnswer(
   return [...rest, next];
 }
 
-export function missingDeviceAnswer(devices: string[], answers: DeviceAnswer[]) {
+export function missingDeviceAnswer(
+  devices: string[],
+  answers: DeviceAnswer[],
+  locale: Locale = "mn"
+) {
   for (const device of orderedDevices(devices)) {
     const answer = answers.find((item) => item.device === device);
-    const name = deviceLabel(device);
+    const name = deviceLabel(device, locale);
     if (
       !answer?.status ||
       !DEVICE_STATUS.some((item) => item.value === answer.status)
     ) {
-      return `${name} ажиллагааг сонгоно уу.`;
+      return line(locale, "pickStatus", name);
     }
     if (deviceDetailKind(device)) {
       const allowed = detailOptions(device).some((item) => item.value === answer.detail);
-      if (!allowed) return `${name} дэлгэрэнгүй ажиллагааг сонгоно уу.`;
+      if (!allowed) return line(locale, "pickDetail", name);
     }
   }
   return "";
@@ -130,27 +136,18 @@ export function firstDetail(devices: DeviceType[], answers: DeviceAnswer[], kind
 }
 
 export function formatDeviceAnswers(
-  answers?: { device: string; status: string; detail?: string }[]
+  answers?: { device: string; status: string; detail?: string }[],
+  locale: Locale = "mn"
 ) {
   if (!answers?.length) return "";
   return orderedDevices(answers.map((item) => item.device))
     .map((device) => {
       const answer = answers.find((item) => item.device === device);
       if (!answer) return "";
-      const legacyStatus =
-        answer.status === "disconnected"
-          ? "Тасалдаж байсан"
-          : answer.status === "intermittent"
-            ? "Хааяа ажиллахгүй"
-            : "";
-      const status =
-        legacyStatus ||
-        DEVICE_STATUS.find((item) => item.value === answer.status)?.label ||
-        answer.status;
-      const detail = detailLabel(device, answer.detail);
-      return detail
-        ? `${deviceLabel(device)}: ${status} · ${detail}`
-        : `${deviceLabel(device)}: ${status}`;
+      const status = optionLabel(locale, "status", answer.status);
+      const detail = detailLabel(device, answer.detail, locale);
+      const name = deviceLabel(device, locale);
+      return detail ? `${name}: ${status} · ${detail}` : `${name}: ${status}`;
     })
     .filter(Boolean)
     .join("; ");

@@ -2,6 +2,8 @@
 
 import { ScanLine, Barcode, Monitor, Printer, Ticket, Wifi, MoreHorizontal } from "lucide-react";
 import { DEVICES } from "@/lib/constants";
+import { useI18n } from "@/components/i18n/LocaleProvider";
+import { optionLabel } from "@/lib/i18n/options";
 import { cn } from "@/lib/utils";
 import type { DeviceType } from "@/types";
 
@@ -25,6 +27,8 @@ export function DeviceSelector({
   onChange: (next: DeviceType[]) => void;
   showBgr?: boolean;
 }) {
+  const { locale } = useI18n();
+
   function toggle(device: DeviceType) {
     if (value.includes(device)) {
       onChange(value.filter((item) => item !== device));
@@ -58,10 +62,12 @@ export function DeviceSelector({
               {ICONS[device.value]}
             </span>
             <span className="text-sm font-semibold text-navy">
-              {device.label}
+              {optionLabel(locale, "device", device.value)}
             </span>
-            {device.hint ? (
-              <span className="text-xs text-muted-foreground">{device.hint}</span>
+            {optionLabel(locale, "hint", device.value) !== device.value ? (
+              <span className="text-xs text-muted-foreground">
+                {optionLabel(locale, "hint", device.value)}
+              </span>
             ) : null}
           </button>
         );

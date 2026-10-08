@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import type { AirlineDTO } from "@/types";
 
 export default function AirlinesPage() {
+  const { t } = useI18n();
   const [items, setItems] = useState<AirlineDTO[]>([]);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -54,7 +56,7 @@ export default function AirlinesPage() {
   }
 
   return (
-    <AdminShell title="Airlines">
+    <AdminShell title={t.nav.airlines}>
       <div className="mb-4 grid gap-2 rounded-[16px] border bg-white p-4 md:grid-cols-3">
         <input
           className="h-10 rounded-lg border px-3"

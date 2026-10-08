@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import {
-  MONTHS,
   clampDateToToday,
   dateYearOptions,
   daysInMonth,
@@ -18,6 +18,7 @@ export function DateSelector({
   value: string;
   onChange: (next: string) => void;
 }) {
+  const { t } = useI18n();
   const today = todayParts();
   const parts = parseDateParts(clampDateToToday(value));
   const years = dateYearOptions().filter((year) => year <= today.year);
@@ -47,7 +48,7 @@ export function DateSelector({
   return (
     <div className="grid grid-cols-3 gap-2">
       <label className="space-y-1.5">
-        <span className="text-xs font-medium text-muted-foreground">Он</span>
+        <span className="text-xs font-medium text-muted-foreground">{t.form.year}</span>
         <select
           className="h-10 w-full rounded-xl border border-border bg-white px-2 text-sm text-navy outline-none focus:border-primary"
           value={parts.year}
@@ -61,13 +62,13 @@ export function DateSelector({
         </select>
       </label>
       <label className="space-y-1.5">
-        <span className="text-xs font-medium text-muted-foreground">Сар</span>
+        <span className="text-xs font-medium text-muted-foreground">{t.form.month}</span>
         <select
           className="h-10 w-full rounded-xl border border-border bg-white px-2 text-sm text-navy outline-none focus:border-primary"
           value={parts.month}
           onChange={(event) => update({ month: Number(event.target.value) })}
         >
-          {MONTHS.slice(0, monthLimit).map((label, index) => (
+          {t.months.slice(0, monthLimit).map((label, index) => (
             <option key={label} value={index + 1}>
               {label}
             </option>
@@ -75,7 +76,7 @@ export function DateSelector({
         </select>
       </label>
       <label className="space-y-1.5">
-        <span className="text-xs font-medium text-muted-foreground">Өдөр</span>
+        <span className="text-xs font-medium text-muted-foreground">{t.form.day}</span>
         <select
           className="h-10 w-full rounded-xl border border-border bg-white px-2 text-sm text-navy outline-none focus:border-primary"
           value={Math.min(parts.day, dayCount)}

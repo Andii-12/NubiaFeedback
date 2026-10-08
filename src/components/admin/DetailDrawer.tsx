@@ -1,10 +1,11 @@
 "use client";
 
-import { labels } from "@/lib/labels";
+import { useLabels } from "@/components/i18n/LocaleProvider";
 import type { FeedbackDTO } from "@/types";
 import Link from "next/link";
 
 export function DetailDrawer({ item }: { item: FeedbackDTO }) {
+  const labels = useLabels();
   return (
     <div className="space-y-4 text-sm">
       <div>

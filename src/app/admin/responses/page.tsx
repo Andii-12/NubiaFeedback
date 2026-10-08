@@ -10,6 +10,7 @@ import {
 } from "@/components/admin/FilterBar";
 import type { AirlineDTO, FeedbackDTO, LocationDTO } from "@/types";
 import { toast } from "sonner";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 
 export default function ResponsesPage() {
   const [filters, setFilters] = useState<FilterState>(defaultFilters());
@@ -18,6 +19,7 @@ export default function ResponsesPage() {
   const [page, setPage] = useState(1);
   const [airlines, setAirlines] = useState<AirlineDTO[]>([]);
   const [locations, setLocations] = useState<LocationDTO[]>([]);
+  const { t } = useI18n();
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
@@ -52,19 +54,19 @@ export default function ResponsesPage() {
   }
 
   async function remove(item: FeedbackDTO) {
-    if (!confirm(`${item.requestId} устгах уу?`)) return;
+    if (!confirm(`${item.requestId} ${t.table.confirm}`)) return;
     const res = await fetch(`/api/admin/feedback/${item._id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Устгаж чадсангүй");
+      toast.error(t.table.deleteFail);
       return;
     }
-    toast.success("Устгалаа");
+    toast.success(t.table.deleted);
     setItems((prev) => prev.filter((row) => row._id !== item._id));
     setTotal((n) => Math.max(0, n - 1));
   }
 
   return (
-    <AdminShell title="Responses">
+    <AdminShell title={t.nav.responses}>
       <FilterBar
         filters={filters}
         onChange={(next) => {
@@ -77,13 +79,15 @@ export default function ResponsesPage() {
       />
       <div className="mt-4 rounded-[16px] border border-border bg-white p-4">
         <div className="mb-3 flex items-center justify-between text-sm text-muted-foreground">
-          <span>{total} хариулт</span>
+          <span>
+            {total} {t.table.count}
+          </span>
           <button
             type="button"
             className="text-primary"
             onClick={() => exportData("csv")}
           >
-            CSV татах
+            {t.table.csv}
           </button>
         </div>
         <FeedbackTable
@@ -102,7 +106,7 @@ export default function ResponsesPage() {
             onClick={() => setPage((p) => p - 1)}
             className="rounded-lg border px-3 py-1 text-sm disabled:opacity-40"
           >
-            Prev
+            {t.table.prev}
           </button>
           <button
             type="button"
@@ -110,7 +114,7 @@ export default function ResponsesPage() {
             onClick={() => setPage((p) => p + 1)}
             className="rounded-lg border px-3 py-1 text-sm disabled:opacity-40"
           >
-            Next
+            {t.table.next}
           </button>
         </div>
       </div>

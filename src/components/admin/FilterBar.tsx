@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { AirlineDTO, LocationDTO } from "@/types";
 import { DEVICES, DEVICE_STATUS, FULLY_RESOLVED, IMPACT_LEVELS } from "@/lib/constants";
+import { useI18n } from "@/components/i18n/LocaleProvider";
+import { optionLabel } from "@/lib/i18n/options";
 
 export type FilterState = {
   range: string;
@@ -36,23 +38,6 @@ export const defaultFilters = (): FilterState => ({
   sort: "newest",
 });
 
-const RANGES = [
-  ["today", "Today"],
-  ["yesterday", "Yesterday"],
-  ["this_week", "This week"],
-  ["this_month", "This month"],
-  ["custom", "Custom"],
-] as const;
-
-const SORTS = [
-  ["newest", "Шинэ нь эхэнд"],
-  ["oldest", "Хуучин нь эхэнд"],
-  ["date_desc", "Огноо шинэ"],
-  ["date_asc", "Огноо хуучин"],
-  ["rating_desc", "Үнэлгээ их"],
-  ["rating_asc", "Үнэлгээ бага"],
-] as const;
-
 export function FilterBar({
   filters,
   onChange,
@@ -66,7 +51,23 @@ export function FilterBar({
   locations: LocationDTO[];
   onExport?: () => void;
 }) {
+  const { locale, t } = useI18n();
   const [open, setOpen] = useState(false);
+  const ranges = [
+    ["today", t.filters.today],
+    ["yesterday", t.filters.yesterday],
+    ["this_week", t.filters.week],
+    ["this_month", t.filters.month],
+    ["custom", t.filters.custom],
+  ] as const;
+  const sorts = [
+    ["newest", t.filters.newest],
+    ["oldest", t.filters.oldest],
+    ["date_desc", t.filters.dateNew],
+    ["date_asc", t.filters.dateOld],
+    ["rating_desc", t.filters.ratingHigh],
+    ["rating_asc", t.filters.ratingLow],
+  ] as const;
 
   function set<K extends keyof FilterState>(key: K, value: FilterState[K]) {
     onChange({ ...filters, [key]: value });
@@ -89,7 +90,7 @@ export function FilterBar({
   return (
     <div className="space-y-3 rounded-[16px] border border-border bg-white p-3 sm:p-4">
       <div className="flex flex-wrap gap-2">
-        {RANGES.map(([value, label]) => (
+        {ranges.map(([value, label]) => (
           <button
             key={value}
             type="button"
@@ -127,17 +128,17 @@ export function FilterBar({
       <div className="flex flex-col gap-2 sm:flex-row">
         <input
           className={`${selectClass} min-w-0 flex-1`}
-          placeholder="Search ID, comment..."
+          placeholder={t.filters.search}
           value={filters.q}
           onChange={(e) => set("q", e.target.value)}
         />
         <select
-          aria-label="Эрэмбэ"
+          aria-label={t.filters.rating}
           className={`${selectClass} sm:w-44`}
           value={filters.sort}
           onChange={(e) => set("sort", e.target.value)}
         >
-          {SORTS.map(([value, label]) => (
+          {sorts.map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -148,7 +149,8 @@ export function FilterBar({
           onClick={() => setOpen((value) => !value)}
           className="h-10 rounded-lg border border-border px-3 text-sm font-medium text-navy"
         >
-          Шүүлт{activeFilterCount ? ` (${activeFilterCount})` : ""}
+          {t.filters.filter}
+          {activeFilterCount ? ` (${activeFilterCount})` : ""}
         </button>
         {onExport ? (
           <button
@@ -156,7 +158,7 @@ export function FilterBar({
             onClick={onExport}
             className="h-10 rounded-lg bg-navy px-4 text-sm font-medium text-white"
           >
-            Excel
+            {t.filters.excel}
           </button>
         ) : null}
       </div>
@@ -169,7 +171,7 @@ export function FilterBar({
             value={filters.airlineId}
             onChange={(e) => set("airlineId", e.target.value)}
           >
-            <option value="">All airlines</option>
+            <option value="">{t.filters.allAirlines}</option>
             {airlines.map((a) => (
               <option key={a._id} value={a._id}>
                 {a.name}
@@ -182,7 +184,7 @@ export function FilterBar({
             value={filters.locationType}
             onChange={(e) => set("locationType", e.target.value)}
           >
-            <option value="">All types</option>
+            <option value="">{t.filters.allTypes}</option>
             <option value="checkin">Check-in</option>
             <option value="gate">Gate</option>
           </select>
@@ -192,7 +194,7 @@ export function FilterBar({
             value={filters.locationId}
             onChange={(e) => set("locationId", e.target.value)}
           >
-            <option value="">All locations</option>
+            <option value="">{t.filters.allLocations}</option>
             {locations.map((l) => (
               <option key={l._id} value={l._id}>
                 {l.name}
@@ -205,12 +207,12 @@ export function FilterBar({
             value={filters.device}
             onChange={(e) => set("device", e.target.value)}
           >
-            <option value="">All devices</option>
-            {DEVICES.map((d) => (
-              <option key={d.value} value={d.value}>
-                {d.label}
-              </option>
-            ))}
+            <option value="">{t.filters.allDevices}</option>
+        {DEVICES.map((d) => (
+          <option key={d.value} value={d.value}>
+            {optionLabel(locale, "device", d.value)}
+          </option>
+        ))}
           </select>
           <select
             aria-label="Technical status"
@@ -218,10 +220,10 @@ export function FilterBar({
             value={filters.status}
             onChange={(e) => set("status", e.target.value)}
           >
-            <option value="">Technical status</option>
+            <option value="">{t.filters.status}</option>
             {DEVICE_STATUS.map((d) => (
               <option key={d.value} value={d.value}>
-                {d.label}
+                {optionLabel(locale, "status", d.value)}
               </option>
             ))}
           </select>
@@ -231,7 +233,7 @@ export function FilterBar({
             value={filters.rating}
             onChange={(e) => set("rating", e.target.value)}
           >
-            <option value="">Engineer rating</option>
+            <option value="">{t.filters.rating}</option>
             {[1, 2, 3, 4, 5].map((n) => (
               <option key={n} value={String(n)}>
                 {n}
@@ -244,10 +246,10 @@ export function FilterBar({
             value={filters.resolved}
             onChange={(e) => set("resolved", e.target.value)}
           >
-            <option value="">Resolution</option>
+            <option value="">{t.filters.resolution}</option>
             {FULLY_RESOLVED.map((d) => (
               <option key={d.value} value={d.value}>
-                {d.label}
+                {optionLabel(locale, "resolved", d.value)}
               </option>
             ))}
           </select>
@@ -257,10 +259,10 @@ export function FilterBar({
             value={filters.impact}
             onChange={(e) => set("impact", e.target.value)}
           >
-            <option value="">Issue severity</option>
+            <option value="">{t.filters.severity}</option>
             {IMPACT_LEVELS.map((d) => (
               <option key={d.value} value={d.value}>
-                {d.label}
+                {optionLabel(locale, "impact", d.value)}
               </option>
             ))}
           </select>
@@ -279,7 +281,7 @@ export function FilterBar({
               }
               className="h-10 rounded-lg border border-border px-3 text-sm text-navy"
             >
-              Шүүлт цэвэрлэх
+              {t.filters.clear}
             </button>
           ) : null}
         </div>

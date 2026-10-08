@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 
 type DutyDay = {
   date: string;
@@ -21,6 +22,7 @@ type Report = {
 };
 
 export default function ReportsPage() {
+  const { t } = useI18n();
   const [overall, setOverall] = useState<Report | null>(null);
   const [months, setMonths] = useState<Report[]>([]);
 
@@ -34,7 +36,7 @@ export default function ReportsPage() {
   }, []);
 
   return (
-    <AdminShell title="Reports">
+    <AdminShell title={t.nav.reports}>
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Бүх сарын тайлан нэг хуудсанд

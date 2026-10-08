@@ -1,6 +1,7 @@
 "use client";
 
 import { MonitorSmartphone, Plane } from "lucide-react";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import { cn } from "@/lib/utils";
 import type { LocationDTO, LocationType } from "@/types";
 
@@ -41,6 +42,7 @@ export function LocationSelector({
   locations: LocationDTO[];
   locationIds: string[];
 }) {
+  const { t } = useI18n();
   const locationType = locationTypes.includes("checkin")
     ? "checkin"
     : locationTypes.includes("gate")
@@ -69,19 +71,19 @@ export function LocationSelector({
     [...internationalGates, ...domesticGates].map((item) => item._id)
   );
   const gateGroups = [
-    { label: "Олон улсын", items: internationalGates },
-    { label: "Дотоод", items: domesticGates },
+    { label: t.form.intl, items: internationalGates },
+    { label: t.form.domestic, items: domesticGates },
     {
-      label: "Бусад",
+      label: t.form.other,
       items: gates.filter((item) => !groupedGateIds.has(item._id)),
     },
   ].filter((group) => group.items.length > 0);
   const checkinGroups = [
-    { label: "A Бүртгэлийн цэг", items: checkins.filter((item) => item.code.startsWith("A")) },
-    { label: "C Бүртгэлийн цэг", items: checkins.filter((item) => item.code.startsWith("C")) },
-    { label: "D Бүртгэлийн цэг", items: checkins.filter((item) => item.code.startsWith("D")) },
+    { label: t.form.deskA, items: checkins.filter((item) => item.code.startsWith("A")) },
+    { label: t.form.deskC, items: checkins.filter((item) => item.code.startsWith("C")) },
+    { label: t.form.deskD, items: checkins.filter((item) => item.code.startsWith("D")) },
     {
-      label: "Бусад",
+      label: t.form.other,
       items: checkins.filter((item) => !/^[ACD]/.test(item.code)),
     },
   ].filter((group) => group.items.length > 0);

@@ -1,68 +1,53 @@
-import {
-  COMMUNICATION,
-  DEVICE_STATUS,
-  DEVICES,
-  EXPLANATION_QUALITY,
-  FULLY_RESOLVED,
-  IMPACT_LEVELS,
-  PRINTING_STATUS,
-  RESOLUTION_SPEED,
-  RESPONSE_SPEED,
-  SCANNING_STATUS,
-  SHIFTS,
-  WORKSTATION_STATUS,
-} from "@/lib/constants";
 import { formatDeviceAnswers } from "@/lib/device-answers";
+import { optionLabel, type Locale } from "@/lib/i18n/options";
 import type { LocationType } from "@/types";
 
-function findLabel<T extends { value: string; label: string }>(
-  list: T[],
-  value?: string | null
-) {
-  if (!value) return "—";
-  return list.find((item) => item.value === value)?.label ?? value;
+export function createLabels(locale: Locale) {
+  const text = (group: string, value?: string | null) =>
+    value ? optionLabel(locale, group, value) : "—";
+
+  return {
+    device: (value?: string) => text("device", value),
+    devices: (values?: string[]) =>
+      values?.length
+        ? values.map((value) => optionLabel(locale, "device", value)).join(", ")
+        : "—",
+    deviceStatus: (value?: string) => text("status", value),
+    deviceReport: (
+      answers?: { device: string; status: string; detail?: string }[],
+      fallback?: string
+    ) => formatDeviceAnswers(answers, locale) || text("status", fallback),
+    printing: (value?: string) => text("print", value),
+    scanning: (value?: string) => text("scan", value),
+    workstation: (value?: string) => text("work", value),
+    impact: (value?: string) => text("impact", value),
+    impactSeverity: (value?: string) => {
+      const severity: Record<string, string> = {
+        none: "Low",
+        low: "Low",
+        medium: "Medium",
+        high: "High",
+        critical: "Critical",
+      };
+      return value ? severity[value] || "—" : "—";
+    },
+    shift: (value?: string) => text("shift", value),
+    responseSpeed: (value?: string) => text("speed", value),
+    resolutionSpeed: (value?: string) => text("resolution", value),
+    fullyResolved: (value?: string) => text("resolved", value),
+    communication: (value?: string) => text("communication", value),
+    explanation: (value?: string) => text("explanation", value),
+    locationType: (value?: LocationType | string) =>
+      value === "gate" ? "Gate" : value === "checkin" ? "Check-in" : "—",
+    locationTypes: (values?: (LocationType | string)[]) => {
+      if (!values?.length) return "—";
+      return [...new Set(values)]
+        .map((value) =>
+          value === "gate" ? "Gate" : value === "checkin" ? "Check-in" : value
+        )
+        .join(", ");
+    },
+  };
 }
 
-export const labels = {
-  device: (value?: string) => findLabel(DEVICES, value),
-  devices: (values?: string[]) =>
-    values?.length ? values.map((v) => findLabel(DEVICES, v)).join(", ") : "—",
-  deviceStatus: (value?: string) => {
-    if (value === "disconnected") return "Тасалдаж байсан";
-    if (value === "intermittent") return "Хааяа ажиллахгүй";
-    return findLabel(DEVICE_STATUS, value);
-  },
-  deviceReport: (
-    answers?: { device: string; status: string; detail?: string }[],
-    fallback?: string
-  ) =>
-    formatDeviceAnswers(answers) ||
-    (fallback === "disconnected"
-      ? "Тасалдаж байсан"
-      : fallback === "intermittent"
-        ? "Хааяа ажиллахгүй"
-        : findLabel(DEVICE_STATUS, fallback)),
-  printing: (value?: string) => findLabel(PRINTING_STATUS, value),
-  scanning: (value?: string) =>
-    value === "slow" ? "Удаан уншсан" : findLabel(SCANNING_STATUS, value),
-  workstation: (value?: string) => findLabel(WORKSTATION_STATUS, value),
-  impact: (value?: string) => findLabel(IMPACT_LEVELS, value),
-  impactSeverity: (value?: string) =>
-    IMPACT_LEVELS.find((item) => item.value === value)?.severity ?? "—",
-  shift: (value?: string) => findLabel(SHIFTS, value),
-  responseSpeed: (value?: string) => findLabel(RESPONSE_SPEED, value),
-  resolutionSpeed: (value?: string) => findLabel(RESOLUTION_SPEED, value),
-  fullyResolved: (value?: string) => findLabel(FULLY_RESOLVED, value),
-  communication: (value?: string) => findLabel(COMMUNICATION, value),
-  explanation: (value?: string) => findLabel(EXPLANATION_QUALITY, value),
-  locationType: (value?: LocationType | string) =>
-    value === "gate" ? "Gate" : value === "checkin" ? "Check-in" : "—",
-  locationTypes: (values?: (LocationType | string)[]) => {
-    if (!values?.length) return "—";
-    return [...new Set(values)]
-      .map((value) =>
-        value === "gate" ? "Gate" : value === "checkin" ? "Check-in" : value
-      )
-      .join(", ");
-  },
-};
+export const labels = createLabels("mn");

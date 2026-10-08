@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import type { LocationDTO } from "@/types";
 
 export default function LocationsPage() {
+  const { t } = useI18n();
   const [items, setItems] = useState<LocationDTO[]>([]);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -44,7 +46,7 @@ export default function LocationsPage() {
   }
 
   return (
-    <AdminShell title="Locations">
+    <AdminShell title={t.nav.locations}>
       <div className="mb-4 grid gap-2 rounded-[16px] border bg-white p-4 md:grid-cols-4">
         <input
           className="h-10 rounded-lg border px-3"

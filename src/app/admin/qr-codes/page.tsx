@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import { QRCodeCard } from "@/components/admin/QRCodeCard";
 import type { LocationDTO } from "@/types";
 
 export default function QRCodesPage() {
+  const { t } = useI18n();
   const [locations, setLocations] = useState<LocationDTO[]>([]);
   const [baseUrl, setBaseUrl] = useState("http://localhost:3000");
   const [type, setType] = useState("all");
@@ -24,7 +26,7 @@ export default function QRCodesPage() {
   );
 
   return (
-    <AdminShell title="QR Codes">
+    <AdminShell title={t.nav.qr}>
       <div className="mb-4 flex gap-2">
         {["all", "checkin", "gate"].map((value) => (
           <button

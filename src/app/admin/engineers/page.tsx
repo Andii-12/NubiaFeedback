@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import { toast } from "sonner";
 
 type EngineerRow = {
@@ -21,6 +22,7 @@ type DutyDay = {
 };
 
 export default function EngineersPage() {
+  const { t } = useI18n();
   const [items, setItems] = useState<EngineerRow[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -135,7 +137,7 @@ export default function EngineersPage() {
   }
 
   return (
-    <AdminShell title="Engineers">
+    <AdminShell title={t.nav.engineers}>
       <div className="mb-4 rounded-[16px] border border-border bg-white p-4">
         <h2 className="text-base font-semibold text-navy">Ээлжийн хуваарь</h2>
         <p className="mt-1 text-sm text-muted-foreground">

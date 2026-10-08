@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 import { AnalyticsChart } from "@/components/admin/AnalyticsChart";
 
 export default function AnalyticsPage() {
+  const { t } = useI18n();
   const [data, setData] = useState<{
     devices: { name: string; count: number }[];
     locations: { name: string; count: number }[];
@@ -23,7 +25,7 @@ export default function AnalyticsPage() {
   }, []);
 
   return (
-    <AdminShell title="Analytics">
+    <AdminShell title={t.nav.analytics}>
       <div className="grid gap-4 xl:grid-cols-2">
         <Card title="Device Issue Count">
           <AnalyticsChart type="bar" data={data?.devices || []} xKey="name" yKey="count" />
