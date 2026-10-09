@@ -7,10 +7,8 @@ import { useRouter } from "next/navigation";
 import { NubiaLogo } from "@/components/nubia/NubiaLogo";
 import { ProgressStepper } from "@/components/nubia/ProgressStepper";
 import { QuestionCard } from "@/components/nubia/QuestionCard";
-import { ChoiceChip } from "@/components/nubia/ChoiceChip";
 import { DeviceSelector } from "@/components/nubia/DeviceSelector";
 import { LocationSelector } from "@/components/nubia/LocationSelector";
-import { EngineerRating } from "@/components/nubia/EngineerRating";
 import { CommentBox } from "@/components/nubia/CommentBox";
 import { FormNavigation } from "@/components/nubia/FormNavigation";
 import { FeedbackSummary } from "@/components/nubia/FeedbackSummary";
@@ -21,12 +19,11 @@ import {
 import {
   COMMUNICATION,
   DEVICE_STATUS,
-  EXPLANATION_QUALITY,
-  IMPACT_LEVELS,
   RESPONSE_SPEED,
   TONE_CLASSES,
 } from "@/lib/constants";
 import { DateSelector } from "@/components/nubia/DateSelector";
+import { TimeSelector } from "@/components/nubia/TimeSelector";
 import {
   answerFor,
   detailOptions,
@@ -39,7 +36,7 @@ import {
   upsertAnswer,
 } from "@/lib/device-answers";
 import { isCompleteDate, isOnOrBeforeToday } from "@/lib/date-parts";
-import { localTime, shiftFromHour } from "@/lib/utils";
+import { hourFromRange, shiftFromHour } from "@/lib/utils";
 import { LanguageSwitch, useI18n } from "@/components/i18n/LocaleProvider";
 import { optionLabel } from "@/lib/i18n/options";
 
@@ -146,6 +143,7 @@ export function FeedbackWizard() {
       }
       if (!isCompleteDate(form.date)) return t.form.errDate;
       if (!isOnOrBeforeToday(form.date)) return t.form.errFuture;
+      if (hourFromRange(form.time) == null) return t.form.errTime;
     }
     if (current === 2) {
       if (!form.devices.length) return t.form.errDevice;
@@ -155,19 +153,13 @@ export function FeedbackWizard() {
         locale
       );
       if (deviceMessage) return deviceMessage;
-      if (!form.impactLevel) return t.form.errImpact;
     }
     if (current === 3) {
       if (!form.responseSpeed) return t.form.errSpeed;
       if (form.resolutionSpeed !== "yes" && form.resolutionSpeed !== "no") {
         return t.form.errResolution;
       }
-      if (form.fullyResolved !== "yes" && form.fullyResolved !== "no") {
-        return t.form.errFully;
-      }
       if (!form.communication) return t.form.errTalk;
-      if (!form.explanationQuality) return t.form.errExplain;
-      if (!form.engineerRating) return t.form.errRating;
     }
     return "";
   }
@@ -190,11 +182,10 @@ export function FeedbackWizard() {
       return;
     }
     setSubmitting(true);
-    const now = new Date();
+    const start = hourFromRange(form.time);
     const stamped = {
       ...form,
-      time: localTime(now),
-      shift: shiftFromHour(now.getHours()),
+      shift: start == null ? form.shift : shiftFromHour(start),
     };
     try {
       const res = await fetch("/api/feedback", {
@@ -323,6 +314,19 @@ export function FeedbackWizard() {
                   onChange={(date) => update("date", date)}
                 />
               </QuestionCard>
+              <QuestionCard title={t.form.time} subtitle={t.form.timeHint}>
+                <TimeSelector
+                  value={form.time}
+                  onChange={(time) => {
+                    const start = hourFromRange(time);
+                    setForm((prev) => ({
+                      ...prev,
+                      time,
+                      shift: start == null ? prev.shift : shiftFromHour(start),
+                    }));
+                  }}
+                />
+              </QuestionCard>
             </>
           )}
 
@@ -346,32 +350,44 @@ export function FeedbackWizard() {
                 const details = detailOptions(device);
                 return (
                   <QuestionCard key={device} title={deviceLabel(device, locale)}>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {DEVICE_STATUS.map((item) => (
-                        <button
-                          key={item.value}
-                          type="button"
-                          onClick={() =>
-                            setForm((prev) => ({
-                              ...prev,
-                              deviceAnswers: upsertAnswer(
-                                prev.deviceAnswers,
-                                device,
-                                { status: item.value }
-                              ),
-                            }))
-                          }
-                          className={`h-9 rounded-lg border text-xs font-semibold ${
-                            answer.status === item.value
-                              ? TONE_CLASSES[item.tone]
-                              : "border-border bg-white text-navy"
-                          }`}
-                        >
-                          {optionLabel(locale, "status", item.value)}
-                        </button>
-                      ))}
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {DEVICE_STATUS.filter((item) => item.value !== "slow").map(
+                        (item) => (
+                          <button
+                            key={item.value}
+                            type="button"
+                            onClick={() =>
+                              setForm((prev) => ({
+                                ...prev,
+                                deviceAnswers: upsertAnswer(
+                                  prev.deviceAnswers,
+                                  device,
+                                  {
+                                    status: item.value,
+                                    ...(item.value === "normal" ? { detail: "" } : {}),
+                                  }
+                                ),
+                              }))
+                            }
+                            className={`h-9 rounded-lg border text-xs font-semibold ${
+                              answer.status === item.value
+                                ? TONE_CLASSES[item.tone]
+                                : "border-border bg-white text-navy"
+                            }`}
+                          >
+                            {optionLabel(
+                              locale,
+                              "status",
+                              item.value === "down" &&
+                                (device === "Mouse" || device === "Monitor")
+                                ? "wasDown"
+                                : item.value
+                            )}
+                          </button>
+                        )
+                      )}
                     </div>
-                    {details.length ? (
+                    {answer.status === "down" && details.length ? (
                       <div className="mt-3 space-y-1.5">
                         <p className="text-xs text-muted-foreground">
                           {detailQuestion(device, locale)}
@@ -410,19 +426,6 @@ export function FeedbackWizard() {
                   </QuestionCard>
                 );
               })}
-              <QuestionCard title={t.form.impact}>
-                <div className="space-y-2">
-                  {IMPACT_LEVELS.map((item) => (
-                    <ChoiceChip
-                      key={item.value}
-                      selected={form.impactLevel === item.value}
-                      onClick={() => update("impactLevel", item.value)}
-                    >
-                      {optionLabel(locale, "impact", item.value)}
-                    </ChoiceChip>
-                  ))}
-                </div>
-              </QuestionCard>
             </>
           )}
 
@@ -455,21 +458,6 @@ export function FeedbackWizard() {
                     }))
                   }
                   onNote={(resolutionNote) => update("resolutionNote", resolutionNote)}
-                />
-              </QuestionCard>
-              <QuestionCard title={t.form.fully}>
-                <YesNoChoice
-                  value={form.fullyResolved}
-                  note={form.resolvedNote}
-                  onChoose={(value) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      fullyResolved: value,
-                      resolvedNote:
-                        prev.fullyResolved === value ? prev.resolvedNote : "",
-                    }))
-                  }
-                  onNote={(resolvedNote) => update("resolvedNote", resolvedNote)}
                 />
               </QuestionCard>
               <QuestionCard title={t.form.communication}>
@@ -521,26 +509,6 @@ export function FeedbackWizard() {
                     </div>
                   ) : null}
                 </div>
-              </QuestionCard>
-              <QuestionCard title={t.form.explanation}>
-                <div className="flex flex-wrap gap-1.5">
-                  {EXPLANATION_QUALITY.map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => update("explanationQuality", item.value)}
-                      className={pillClass(form.explanationQuality === item.value)}
-                    >
-                      {optionLabel(locale, "explanation", item.value)}
-                    </button>
-                  ))}
-                </div>
-              </QuestionCard>
-              <QuestionCard title={t.form.rating}>
-                <EngineerRating
-                  value={form.engineerRating}
-                  onChange={(v) => update("engineerRating", v)}
-                />
               </QuestionCard>
             </>
           )}

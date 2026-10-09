@@ -1,6 +1,6 @@
 "use client";
 
-import { ScanLine, Barcode, Monitor, Printer, Ticket, Wifi, MoreHorizontal } from "lucide-react";
+import { ScanLine, Barcode, Monitor, Mouse, Printer, Ticket, Wifi, MoreHorizontal } from "lucide-react";
 import { DEVICES } from "@/lib/constants";
 import { useI18n } from "@/components/i18n/LocaleProvider";
 import { optionLabel } from "@/lib/i18n/options";
@@ -15,6 +15,8 @@ const ICONS: Record<DeviceType, React.ReactNode> = {
   BPP: <Ticket className="size-3.5" />,
   DCP: <Printer className="size-3.5" />,
   Network: <Wifi className="size-3.5" />,
+  Mouse: <Mouse className="size-3.5" />,
+  Monitor: <Monitor className="size-3.5" />,
   Other: <MoreHorizontal className="size-3.5" />,
 };
 

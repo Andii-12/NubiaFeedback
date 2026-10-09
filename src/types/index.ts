@@ -8,6 +8,8 @@ export type DeviceType =
   | "BPP"
   | "DCP"
   | "Network"
+  | "Mouse"
+  | "Monitor"
   | "Other";
 export type Shift = "morning" | "afternoon" | "evening";
 
@@ -178,7 +180,10 @@ export const defaultFormState = (): FeedbackFormState => {
     locationIds: [],
     date: `${y}-${m}-${day}`,
     shift,
-    time: `${String(hour).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
+    time:
+      hour === 23
+        ? "23:00–23:59"
+        : `${String(hour).padStart(2, "0")}:00–${String(hour + 1).padStart(2, "0")}:00`,
     devices: [],
     deviceAnswers: [],
     deviceStatus: "",

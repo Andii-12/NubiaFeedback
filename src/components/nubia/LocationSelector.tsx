@@ -5,32 +5,6 @@ import { useI18n } from "@/components/i18n/LocaleProvider";
 import { cn } from "@/lib/utils";
 import type { LocationDTO, LocationType } from "@/types";
 
-function Chip({
-  selected,
-  onClick,
-  children,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={selected}
-      onClick={onClick}
-      className={cn(
-        "h-8 rounded-lg border px-2.5 text-xs font-semibold transition-colors",
-        selected
-          ? "border-primary bg-nubia-light text-navy"
-          : "border-border bg-white text-navy hover:border-primary/40"
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
 export function LocationSelector({
   locationTypes,
   onChange,
@@ -95,7 +69,7 @@ export function LocationSelector({
 
   function chooseLocation(id: string) {
     if (!locationType) return;
-    onChange({ locationTypes: [locationType], locationIds: [id] });
+    onChange({ locationTypes: [locationType], locationIds: id ? [id] : [] });
   }
 
   return (
@@ -132,49 +106,41 @@ export function LocationSelector({
       </div>
 
       {locationType === "checkin" ? (
-        <div className="space-y-2">
+        <select
+          className="h-10 w-full rounded-xl border border-border bg-white px-3 text-sm text-navy outline-none focus:border-primary"
+          value={selectedId}
+          onChange={(event) => chooseLocation(event.target.value)}
+        >
+          <option value="">{t.form.pickCheckin}</option>
           {checkinGroups.map((group) => (
-            <div key={group.label} className="space-y-2">
-              <div className="text-xs font-medium text-muted-foreground">
-                {group.label}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {group.items.map((location) => (
-                  <Chip
-                    key={location._id}
-                    selected={selectedId === location._id}
-                    onClick={() => chooseLocation(location._id)}
-                  >
-                    {location.name}
-                  </Chip>
-                ))}
-              </div>
-            </div>
+            <optgroup key={group.label} label={group.label}>
+              {group.items.map((location) => (
+                <option key={location._id} value={location._id}>
+                  {location.name}
+                </option>
+              ))}
+            </optgroup>
           ))}
-        </div>
+        </select>
       ) : null}
 
       {locationType === "gate" ? (
-        <div className="space-y-2">
+        <select
+          className="h-10 w-full rounded-xl border border-border bg-white px-3 text-sm text-navy outline-none focus:border-primary"
+          value={selectedId}
+          onChange={(event) => chooseLocation(event.target.value)}
+        >
+          <option value="">{t.form.pickGate}</option>
           {gateGroups.map((group) => (
-            <div key={group.label} className="space-y-2">
-              <div className="text-xs font-medium text-muted-foreground">
-                {group.label}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {group.items.map((location) => (
-                  <Chip
-                    key={location._id}
-                    selected={selectedId === location._id}
-                    onClick={() => chooseLocation(location._id)}
-                  >
-                    {`Gate ${gateNumber(location.code)}`}
-                  </Chip>
-                ))}
-              </div>
-            </div>
+            <optgroup key={group.label} label={group.label}>
+              {group.items.map((location) => (
+                <option key={location._id} value={location._id}>
+                  {`Gate ${gateNumber(location.code)}`}
+                </option>
+              ))}
+            </optgroup>
           ))}
-        </div>
+        </select>
       ) : null}
     </div>
   );

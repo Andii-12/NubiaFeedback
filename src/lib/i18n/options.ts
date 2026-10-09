@@ -6,11 +6,13 @@ const TEXT: Record<string, Record<string, Pair>> = {
   device: {
     OCR: { mn: "Keyboard / Swipe", en: "Keyboard / Swipe" },
     BGR: { mn: "BGR", en: "BGR" },
-    WS: { mn: "Computer", en: "Computer" },
+    WS: { mn: "DCS program", en: "DCS program" },
     BTP: { mn: "BTP", en: "BTP" },
     BPP: { mn: "BPP", en: "BPP" },
     DCP: { mn: "DCP", en: "DCP" },
     Network: { mn: "Network", en: "Network" },
+    Mouse: { mn: "Mouse", en: "Mouse" },
+    Monitor: { mn: "Monitor", en: "Monitor" },
     Other: { mn: "Бусад", en: "Other" },
   },
   hint: {
@@ -25,6 +27,7 @@ const TEXT: Record<string, Record<string, Pair>> = {
     normal: { mn: "Хэвийн", en: "Normal" },
     slow: { mn: "Удаан", en: "Slow" },
     down: { mn: "Ажиллахгүй", en: "Not working" },
+    wasDown: { mn: "Ажиллахгүй байсан", en: "Was not working" },
     disconnected: { mn: "Тасалдаж байсан", en: "Disconnected" },
     intermittent: { mn: "Хааяа ажиллахгүй", en: "Intermittent" },
   },
@@ -34,6 +37,11 @@ const TEXT: Record<string, Record<string, Pair>> = {
     jammed: { mn: "Цаас гацсан", en: "Paper jam" },
     faded: { mn: "Бүдэг хэвлэсэн", en: "Faded print" },
     none: { mn: "Огт хэвлээгүй", en: "Did not print" },
+    nocut: { mn: "Цаасаа таслахгүй байсан", en: "Was not cutting the paper" },
+    tangled: { mn: "Цаас дамарт орооцолдсон", en: "Paper tangled on the reel" },
+    streaked: { mn: "Зураастай хэвлэсэн", en: "Printed with streaks" },
+    noprint: { mn: "Хэвлэхгүй байсан", en: "Was not printing" },
+    chewed: { mn: "Цаасаа зажилсан", en: "Chewed the paper" },
   },
   scan: {
     normal: { mn: "Хэвийн уншсан", en: "Read normally" },
@@ -41,6 +49,9 @@ const TEXT: Record<string, Record<string, Pair>> = {
     partial: { mn: "Заримдаа уншаагүй", en: "Sometimes did not read" },
     none: { mn: "Огт уншаагүй", en: "Did not read" },
     slow: { mn: "Удаан уншсан", en: "Read slowly" },
+    misread: { mn: "Алдаж уншсан", en: "Read incorrectly" },
+    keys: { mn: "Үсэг ажиллахгүй байсан", en: "Keys were not working" },
+    unread: { mn: "Уншихгүй байсан", en: "Was not reading" },
   },
   work: {
     normal: { mn: "Хэвийн", en: "Normal" },
@@ -48,6 +59,8 @@ const TEXT: Record<string, Record<string, Pair>> = {
     frozen: { mn: "Гацсан", en: "Frozen" },
     disconnected: { mn: "Холболт тасарсан", en: "Connection lost" },
     reboot: { mn: "Дахин асаах шаардлагатай болсон", en: "Needed a restart" },
+    offline: { mn: "Сүлжээгүй болсон", en: "Lost network" },
+    cut: { mn: "Тасарсан", en: "Disconnected" },
   },
   impact: {
     none: { mn: "Нөлөөлөөгүй", en: "No impact" },

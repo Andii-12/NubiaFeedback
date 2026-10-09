@@ -1,8 +1,12 @@
 import {
   DEVICES,
-  DEVICE_STATUS,
   PRINT_DEVICES,
   PRINTING_STATUS,
+  BTP_STATUS,
+  DCP_STATUS,
+  DCS_STATUS,
+  KEYBOARD_STATUS,
+  NETWORK_STATUS,
   SCAN_DEVICES,
   SCANNING_STATUS,
   WS_DEVICES,
@@ -50,6 +54,11 @@ export function detailQuestion(device: string, locale: Locale = "mn") {
 
 export function detailOptions(device: string) {
   const kind = deviceDetailKind(device);
+  if (device === "OCR") return KEYBOARD_STATUS;
+  if (device === "WS") return DCS_STATUS;
+  if (device === "BTP" || device === "BPP") return BTP_STATUS;
+  if (device === "DCP") return DCP_STATUS;
+  if (device === "Network") return NETWORK_STATUS;
   if (kind === "print") return PRINTING_STATUS;
   if (kind === "scan") return SCANNING_STATUS;
   if (kind === "workstation") return WORKSTATION_STATUS;
@@ -102,13 +111,10 @@ export function missingDeviceAnswer(
   for (const device of orderedDevices(devices)) {
     const answer = answers.find((item) => item.device === device);
     const name = deviceLabel(device, locale);
-    if (
-      !answer?.status ||
-      !DEVICE_STATUS.some((item) => item.value === answer.status)
-    ) {
+    if (answer?.status !== "normal" && answer?.status !== "down") {
       return line(locale, "pickStatus", name);
     }
-    if (deviceDetailKind(device)) {
+    if (answer.status === "down" && deviceDetailKind(device)) {
       const allowed = detailOptions(device).some((item) => item.value === answer.detail);
       if (!allowed) return line(locale, "pickDetail", name);
     }

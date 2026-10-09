@@ -43,7 +43,7 @@ const FeedbackSchema = new mongoose.Schema(
       printingStatus: { type: String, default: "" },
       scanningStatus: { type: String, default: "" },
       workstationStatus: { type: String, default: "" },
-      impactLevel: { type: String, required: true },
+      impactLevel: { type: String, default: "" },
       deviceAnswers: {
         type: [
           new mongoose.Schema(
@@ -62,13 +62,13 @@ const FeedbackSchema = new mongoose.Schema(
       responseSpeed: { type: String, required: true },
       resolutionSpeed: { type: String, required: true },
       resolutionNote: { type: String, default: "", maxlength: 500 },
-      fullyResolved: { type: String, required: true },
+      fullyResolved: { type: String, default: "" },
       resolvedNote: { type: String, default: "", maxlength: 500 },
       communication: { type: String, required: true },
       communicationNote: { type: String, default: "", maxlength: 500 },
-      explanationQuality: { type: String, required: true },
+      explanationQuality: { type: String, default: "" },
     },
-    engineerRating: { type: Number, min: 1, max: 5, required: true },
+    engineerRating: { type: Number, min: 0, max: 5, default: 0 },
     comment: { type: String, default: "", maxlength: 500 },
     engineerId: { type: mongoose.Schema.Types.ObjectId, ref: "Engineer" },
     adminNotes: { type: [AdminNoteSchema], default: [] },
@@ -82,5 +82,8 @@ FeedbackSchema.index({ airlineId: 1 });
 FeedbackSchema.index({ locationId: 1 });
 FeedbackSchema.index({ locationIds: 1 });
 
-export default mongoose.models.Feedback ||
-  mongoose.model("Feedback", FeedbackSchema);
+if (mongoose.models.Feedback) {
+  mongoose.deleteModel("Feedback");
+}
+
+export default mongoose.model("Feedback", FeedbackSchema);

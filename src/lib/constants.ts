@@ -20,12 +20,13 @@ export const DEVICES: {
 }[] = [
   { value: "OCR", label: "Keyboard / Swipe" },
   { value: "BGR", label: "BGR", hint: "Barcode уншигч" },
-  { value: "WS", label: "Computer" },
+  { value: "WS", label: "DCS program" },
   { value: "BTP", label: "BTP", hint: "Ачааны пайз хэвлэгч" },
   { value: "BPP", label: "BPP", hint: "Суугчийн талон хэвлэгч" },
   { value: "DCP", label: "DCP", hint: "Жагсаалт хэвлэгч" },
   { value: "Network", label: "Network", hint: "Сүлжээ" },
-  { value: "Other", label: "Бусад", hint: "Mouse, Monitor" },
+  { value: "Mouse", label: "Mouse" },
+  { value: "Monitor", label: "Monitor" },
 ];
 
 export const SHIFTS: { value: Shift; label: string }[] = [
@@ -44,6 +45,20 @@ export const DEVICE_STATUS: {
   { value: "down", label: "Ажиллахгүй", tone: "danger" },
 ];
 
+export const DCP_STATUS: { value: string; label: string }[] = [
+  { value: "faded", label: "Бүдэг хэвлэсэн" },
+  { value: "chewed", label: "Цаасаа зажилсан" },
+  { value: "noprint", label: "Хэвлэхгүй байсан" },
+];
+
+export const BTP_STATUS: { value: string; label: string }[] = [
+  { value: "nocut", label: "Цаасаа таслахгүй байсан" },
+  { value: "tangled", label: "Цаас дамарт орооцолдсон" },
+  { value: "streaked", label: "Зураастай хэвлэсэн" },
+  { value: "faded", label: "Бүдэг хэвлэсэн" },
+  { value: "noprint", label: "Хэвлэхгүй байсан" },
+];
+
 export const PRINTING_STATUS: { value: PrintingStatus; label: string }[] = [
   { value: "normal", label: "Хэвийн хэвлэж байсан" },
   { value: "slow", label: "Удаан хэвлэж байсан" },
@@ -59,6 +74,12 @@ export const SCANNING_STATUS: { value: ScanningStatus; label: string }[] = [
   { value: "none", label: "Огт уншаагүй" },
 ];
 
+export const KEYBOARD_STATUS: { value: string; label: string }[] = [
+  { value: "misread", label: "Алдаж уншсан" },
+  { value: "keys", label: "Үсэг ажиллахгүй байсан" },
+  { value: "unread", label: "Уншихгүй байсан" },
+];
+
 export const WORKSTATION_STATUS: {
   value: WorkstationStatus;
   label: string;
@@ -68,6 +89,17 @@ export const WORKSTATION_STATUS: {
   { value: "frozen", label: "Гацсан" },
   { value: "disconnected", label: "Холболт тасарсан" },
   { value: "reboot", label: "Дахин асаах шаардлагатай болсон" },
+];
+
+export const NETWORK_STATUS: { value: string; label: string }[] = [
+  { value: "cut", label: "Тасарсан" },
+  { value: "frozen", label: "Гацсан" },
+];
+
+export const DCS_STATUS: { value: string; label: string }[] = [
+  { value: "frozen", label: "Гацсан" },
+  { value: "disconnected", label: "Холболт тасарсан" },
+  { value: "offline", label: "Сүлжээгүй болсон" },
 ];
 
 export const IMPACT_LEVELS: {

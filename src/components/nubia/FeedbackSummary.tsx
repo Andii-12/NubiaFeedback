@@ -76,6 +76,7 @@ export function FeedbackSummary({
         onEdit={() => onEdit(1)}
       />
       <Row label={t.form.date} editLabel={t.common.edit} value={form.date} onEdit={() => onEdit(1)} />
+      <Row label={t.form.time} editLabel={t.common.edit} value={form.time} onEdit={() => onEdit(1)} />
       <Row
         label={t.form.sumDevice}
         editLabel={t.common.edit}
@@ -88,12 +89,6 @@ export function FeedbackSummary({
         value={
           labels.deviceReport(form.deviceAnswers, form.deviceStatus) || "—"
         }
-        onEdit={() => onEdit(2)}
-      />
-      <Row
-        label={t.form.sumImpact}
-        editLabel={t.common.edit}
-        value={labels.impact(form.impactLevel)}
         onEdit={() => onEdit(2)}
       />
       <Row
@@ -114,31 +109,11 @@ export function FeedbackSummary({
         onEdit={() => onEdit(3)}
       />
       <Row
-        label={t.form.sumFully}
-        editLabel={t.common.edit}
-        value={[labels.fullyResolved(form.fullyResolved), form.resolvedNote]
-          .filter(Boolean)
-          .join(" · ")}
-        onEdit={() => onEdit(3)}
-      />
-      <Row
         label={t.form.sumTalk}
         editLabel={t.common.edit}
         value={[labels.communication(form.communication), form.communicationNote]
           .filter(Boolean)
           .join(" · ")}
-        onEdit={() => onEdit(3)}
-      />
-      <Row
-        label={t.form.sumExplain}
-        editLabel={t.common.edit}
-        value={labels.explanation(form.explanationQuality)}
-        onEdit={() => onEdit(3)}
-      />
-      <Row
-        label={t.form.sumRating}
-        editLabel={t.common.edit}
-        value={form.engineerRating ? `${form.engineerRating} / 5` : "—"}
         onEdit={() => onEdit(3)}
       />
       <Row

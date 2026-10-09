@@ -1,6 +1,8 @@
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { Airline, Feedback, Location } from "@/lib/models";
+import { Airline, Location } from "@/lib/models";
+import "@/lib/models/Feedback";
 import { nextRequestId } from "@/lib/request-id";
 import { feedbackSchema } from "@/lib/validations/feedback";
 import {
@@ -87,7 +89,7 @@ export async function POST(request: Request) {
     );
 
     const requestId = await nextRequestId();
-    const created = await Feedback.create({
+    const created = await mongoose.model("Feedback").create({
       requestId,
       airlineId: data.airlineId,
       locationId: locations[0]._id,

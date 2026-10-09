@@ -30,18 +30,23 @@ export async function GET() {
       return assigned || dates.has(item.date);
     });
     const total = items.length;
+    const rated = items.filter((item) => item.engineerRating >= 1);
     const avg =
-      total === 0
+      rated.length === 0
         ? 0
         : Math.round(
-            (items.reduce((sum, i) => sum + i.engineerRating, 0) / total) * 10
+            (rated.reduce((sum, i) => sum + i.engineerRating, 0) / rated.length) * 10
           ) / 10;
+    const resolvedItems = items.filter((item) =>
+      ["yes", "no"].includes(item.engineerAnswers.fullyResolved)
+    );
     const resolved =
-      total === 0
+      resolvedItems.length === 0
         ? 0
         : Math.round(
-            (items.filter((i) => i.engineerAnswers.fullyResolved === "yes").length /
-              total) *
+            (resolvedItems.filter((i) => i.engineerAnswers.fullyResolved === "yes")
+              .length /
+              resolvedItems.length) *
               100
           );
     const responseScore =
