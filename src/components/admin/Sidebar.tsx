@@ -5,12 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Inbox,
-  BarChart3,
   Users,
   Plane,
   MapPin,
-  QrCode,
-  FileText,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -22,12 +19,9 @@ import { useI18n } from "@/components/i18n/LocaleProvider";
 const ICONS = [
   { href: "/admin", key: "dashboard", icon: LayoutDashboard },
   { href: "/admin/responses", key: "responses", icon: Inbox },
-  { href: "/admin/analytics", key: "analytics", icon: BarChart3 },
   { href: "/admin/engineers", key: "engineers", icon: Users },
   { href: "/admin/airlines", key: "airlines", icon: Plane },
   { href: "/admin/locations", key: "locations", icon: MapPin },
-  { href: "/admin/qr-codes", key: "qr", icon: QrCode },
-  { href: "/admin/reports", key: "reports", icon: FileText },
   { href: "/admin/settings", key: "settings", icon: Settings },
 ] as const;
 

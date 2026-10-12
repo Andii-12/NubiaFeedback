@@ -16,7 +16,7 @@ export function AdminShell({
 
   return (
     <div className="flex min-h-screen bg-surface">
-      <div className="hidden lg:block">
+      <div className="no-print hidden lg:block">
         <div className="sticky top-0 h-screen">
           <Sidebar />
         </div>
@@ -28,7 +28,7 @@ export function AdminShell({
       </Sheet>
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminHeader title={title} onMenu={() => setOpen(true)} />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6 print:p-0">{children}</main>
       </div>
     </div>
   );

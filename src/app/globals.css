@@ -159,4 +159,11 @@
   .print-poster {
     box-shadow: none !important;
   }
+  .report-sheet {
+    break-after: page;
+    box-shadow: none !important;
+  }
+  .report-sheet:last-child {
+    break-after: auto;
+  }
 }

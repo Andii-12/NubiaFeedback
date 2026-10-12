@@ -15,7 +15,7 @@ export function AdminHeader({
   const { data } = useSession();
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-white px-4 md:px-6">
+    <header className="no-print flex h-16 items-center justify-between border-b border-border bg-white px-4 md:px-6">
       <div className="flex items-center gap-3">
         <Button
           variant="outline"

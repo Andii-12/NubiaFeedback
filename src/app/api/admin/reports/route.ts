@@ -3,75 +3,144 @@ import { connectDB } from "@/lib/db";
 import { Duty, Feedback } from "@/lib/models";
 import { getSessionUser } from "@/lib/api-auth";
 
+type Named = { name?: string } | string | null | undefined;
+
+type Answer = { device: string; status: string; detail?: string };
+
 type FeedbackItem = {
   date: string;
-  devices: string[];
-  engineerRating: number;
-  engineerAnswers: { fullyResolved: string };
-  locationId?: { name?: string } | string;
-  locationIds?: ({ name?: string } | string)[];
-  engineerId?: { name?: string } | string | null;
+  time?: string;
+  shift?: string;
+  devices?: string[];
+  comment?: string;
+  engineerRating?: number;
+  airlineId?: Named;
+  locationId?: Named;
+  locationIds?: Named[];
+  technicalAnswers?: {
+    deviceStatus?: string;
+    deviceAnswers?: Answer[];
+  } | null;
+  engineerAnswers?: {
+    fullyResolved?: string;
+    responseSpeed?: string;
+    resolutionSpeed?: string;
+    communication?: string;
+    resolutionNote?: string;
+    communicationNote?: string;
+  } | null;
 };
 
-function summarize(items: FeedbackItem[]) {
-  const deviceCount: Record<string, number> = {};
-  const locationCount: Record<string, number> = {};
-  const engineerRatings: Record<string, { sum: number; count: number }> = {};
-  let resolved = 0;
+function nameOf(value: Named) {
+  if (!value || typeof value === "string") return "";
+  return value.name || "";
+}
 
-  for (const item of items) {
-    for (const device of item.devices) {
-      deviceCount[device] = (deviceCount[device] || 0) + 1;
+function bump(map: Record<string, number>, key: string) {
+  if (!key) return;
+  map[key] = (map[key] || 0) + 1;
+}
+
+function ranked(map: Record<string, number>) {
+  return Object.entries(map)
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+}
+
+function summarize(items: FeedbackItem[], withEntries: boolean) {
+  const devices: Record<string, number> = {};
+  const deviceIssues: Record<string, number> = {};
+  const locations: Record<string, number> = {};
+  const airlines: Record<string, number> = {};
+  const shifts: Record<string, number> = {};
+  const speeds: Record<string, number> = {};
+  const resolutions: Record<string, number> = {};
+  const communications: Record<string, number> = {};
+  let issues = 0;
+  let resolvedYes = 0;
+  let resolvedKnown = 0;
+  let ratingSum = 0;
+  let rated = 0;
+
+  const entries = items.map((item) => {
+    for (const device of item.devices || []) bump(devices, device);
+    const places = (item.locationIds || []).map(nameOf).filter(Boolean);
+    const location = places.length ? places : [nameOf(item.locationId)].filter(Boolean);
+    for (const place of location) bump(locations, place);
+    bump(airlines, nameOf(item.airlineId));
+    bump(shifts, item.shift || "");
+
+    const answers = item.technicalAnswers?.deviceAnswers || [];
+    for (const answer of answers) {
+      if (answer.status && answer.status !== "normal") bump(deviceIssues, answer.device);
     }
-    const named = (item.locationIds || [])
-      .map((loc) => (typeof loc === "object" ? loc?.name || "" : ""))
+    const hasIssue =
+      Boolean(
+        item.technicalAnswers?.deviceStatus &&
+          item.technicalAnswers.deviceStatus !== "normal"
+      ) || answers.some((answer) => answer.status && answer.status !== "normal");
+    if (hasIssue) issues += 1;
+
+    const engineer = item.engineerAnswers;
+    const resolved = engineer?.fullyResolved || "";
+    if (resolved === "yes" || resolved === "no" || resolved === "temporary") {
+      resolvedKnown += 1;
+      if (resolved === "yes") resolvedYes += 1;
+    }
+    if ((item.engineerRating || 0) >= 1) {
+      ratingSum += item.engineerRating || 0;
+      rated += 1;
+    }
+    bump(speeds, engineer?.responseSpeed || "");
+    bump(resolutions, engineer?.resolutionSpeed || "");
+    bump(communications, engineer?.communication || "");
+
+    const notes = [engineer?.resolutionNote, engineer?.communicationNote, item.comment]
+      .map((note) => (note || "").trim())
       .filter(Boolean);
-    const locs = named.length
-      ? named
-      : [
-          typeof item.locationId === "object" ? item.locationId?.name || "" : "",
-        ].filter(Boolean);
-    for (const loc of locs) {
-      locationCount[loc] = (locationCount[loc] || 0) + 1;
-    }
-    const eng =
-      typeof item.engineerId === "object" && item.engineerId
-        ? item.engineerId.name || ""
-        : "";
-    if (eng) {
-      engineerRatings[eng] ??= { sum: 0, count: 0 };
-      engineerRatings[eng].sum += item.engineerRating;
-      engineerRatings[eng].count += 1;
-    }
-    if (item.engineerAnswers.fullyResolved === "yes") resolved += 1;
-  }
 
-  const topDevice =
-    Object.entries(deviceCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
-  const topLocation =
-    Object.entries(locationCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
-  const bestEngineer =
-    Object.entries(engineerRatings)
-      .map(([name, v]) => ({ name, avg: v.sum / v.count }))
-      .sort((a, b) => b.avg - a.avg)[0] || null;
-  const avgScore = items.length
-    ? Math.round(
-        (items.reduce((s, i) => s + i.engineerRating, 0) / items.length) * 10
-      ) / 10
-    : 0;
+    return {
+      date: item.date,
+      time: item.time || "",
+      shift: item.shift || "",
+      airline: nameOf(item.airlineId),
+      location: location.join(", "),
+      devices: item.devices || [],
+      deviceStatus: item.technicalAnswers?.deviceStatus || "",
+      deviceAnswers: answers.map((answer) => ({
+        device: answer.device,
+        status: answer.status,
+        detail: answer.detail || "",
+      })),
+      note: notes.join(" · "),
+      rating: item.engineerRating || 0,
+      responseSpeed: engineer?.responseSpeed || "",
+      resolutionSpeed: engineer?.resolutionSpeed || "",
+      communication: engineer?.communication || "",
+      issue: hasIssue,
+    };
+  });
+
+  entries.sort((a, b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`));
 
   return {
     total: items.length,
-    mostProblematicDevice: topDevice,
-    mostProblematicLocation: topLocation,
-    bestEngineer: bestEngineer
-      ? `${bestEngineer.name} (${bestEngineer.avg.toFixed(1)})`
-      : "—",
-    averageEngineerScore: avgScore,
-    topIssueCategory: topDevice,
-    resolvedPercent: items.length
-      ? Math.round((resolved / items.length) * 100)
-      : 0,
+    issueCount: issues,
+    averageEngineerScore: rated ? Math.round((ratingSum / rated) * 10) / 10 : 0,
+    ratedCount: rated,
+    resolvedPercent: resolvedKnown ? Math.round((resolvedYes / resolvedKnown) * 100) : 0,
+    resolvedKnown,
+    devices: ranked(devices).map((row) => ({
+      ...row,
+      issues: deviceIssues[row.key] || 0,
+    })),
+    locations: ranked(locations),
+    airlines: ranked(airlines),
+    shifts: ranked(shifts),
+    speeds: ranked(speeds),
+    resolutions: ranked(resolutions),
+    communications: ranked(communications),
+    entries: withEntries ? entries : [],
   };
 }
 
@@ -81,10 +150,10 @@ export async function GET() {
   await connectDB();
 
   const rows = await Feedback.find()
+    .populate("airlineId", "name")
     .populate("locationId", "name")
     .populate("locationIds", "name")
-    .populate("engineerId", "name")
-    .sort({ date: 1 });
+    .sort({ date: 1, time: 1 });
 
   const items = rows.map((row) => row.toObject() as FeedbackItem);
   const byMonth: Record<string, FeedbackItem[]> = {};
@@ -118,12 +187,12 @@ export async function GET() {
     .sort((a, b) => b.localeCompare(a))
     .map((month) => ({
       month,
-      ...summarize(byMonth[month] || []),
+      ...summarize(byMonth[month] || [], true),
       duties: dutiesByMonth[month] || [],
     }));
 
   return NextResponse.json({
-    overall: summarize(items),
+    overall: { ...summarize(items, false), duties: [] },
     months,
   });
 }
