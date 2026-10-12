@@ -38,13 +38,13 @@ export async function GET() {
             (rated.reduce((sum, i) => sum + i.engineerRating, 0) / rated.length) * 10
           ) / 10;
     const resolvedItems = items.filter((item) =>
-      ["yes", "no"].includes(item.engineerAnswers.fullyResolved)
+      ["yes", "no"].includes(item.engineerAnswers?.fullyResolved ?? "")
     );
     const resolved =
       resolvedItems.length === 0
         ? 0
         : Math.round(
-            (resolvedItems.filter((i) => i.engineerAnswers.fullyResolved === "yes")
+            (resolvedItems.filter((i) => i.engineerAnswers?.fullyResolved === "yes")
               .length /
               resolvedItems.length) *
               100
@@ -54,7 +54,7 @@ export async function GET() {
         ? 0
         : Math.round(
             (items.filter((i) =>
-              ["very_fast", "fast"].includes(i.engineerAnswers.responseSpeed)
+              ["very_fast", "fast"].includes(i.engineerAnswers?.responseSpeed ?? "")
             ).length /
               total) *
               100

@@ -45,7 +45,7 @@ export async function GET(request: Request) {
   const onDuty = await dutyNamesForDates(latestDocs.map((item) => item.date));
 
   const issueCount = (items: typeof current) =>
-    items.filter((i) => i.technicalAnswers.deviceStatus !== "normal").length;
+    items.filter((i) => i.technicalAnswers?.deviceStatus !== "normal").length;
   const avgRating = (items: typeof current) =>
     items.length
       ? Math.round(
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
         ) / 10
       : 0;
   const critical = (items: typeof current) =>
-    items.filter((i) => i.technicalAnswers.impactLevel === "critical").length;
+    items.filter((i) => i.technicalAnswers?.impactLevel === "critical").length;
 
   const deviceMap: Record<string, number> = {};
   const locationMap: Record<string, number> = {};
@@ -85,8 +85,8 @@ export async function GET(request: Request) {
     else if (item.engineerRating === 3) ratingMap.Average += 1;
     else ratingMap.Poor += 1;
     trendMap[item.date] = (trendMap[item.date] || 0) + 1;
-    if (item.engineerAnswers.fullyResolved === "yes") resolved += 1;
-    else if (item.engineerAnswers.fullyResolved === "temporary") partial += 1;
+    if (item.engineerAnswers?.fullyResolved === "yes") resolved += 1;
+    else if (item.engineerAnswers?.fullyResolved === "temporary") partial += 1;
     else notResolved += 1;
   }
 
@@ -118,10 +118,10 @@ export async function GET(request: Request) {
             locationTypes: places.types,
             locationType: places.types[0] || item.locationType,
             devices: item.devices,
-            status: item.technicalAnswers.deviceStatus,
-            deviceAnswers: item.technicalAnswers.deviceAnswers || [],
+            status: item.technicalAnswers?.deviceStatus,
+            deviceAnswers: item.technicalAnswers?.deviceAnswers || [],
             rating: item.engineerRating,
-            resolved: item.engineerAnswers.fullyResolved,
+            resolved: item.engineerAnswers?.fullyResolved,
             dutyEngineers: onDuty.get(item.date) || [],
           };
         }),

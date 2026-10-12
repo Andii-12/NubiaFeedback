@@ -49,9 +49,29 @@ export function toFeedbackDTO(doc: {
   date: string;
   time: string;
   shift: FeedbackDTO["shift"];
-  devices: FeedbackDTO["devices"];
-  technicalAnswers: FeedbackDTO["technicalAnswers"];
-  engineerAnswers: FeedbackDTO["engineerAnswers"];
+  devices: string[];
+  technicalAnswers?: {
+    deviceStatus: string;
+    printingStatus?: string;
+    scanningStatus?: string;
+    workstationStatus?: string;
+    impactLevel?: string;
+    deviceAnswers?: ReadonlyArray<{
+      device: string;
+      status: string;
+      detail?: string;
+    }>;
+  } | null;
+  engineerAnswers?: {
+    responseSpeed?: string;
+    resolutionSpeed?: string;
+    resolutionNote?: string;
+    fullyResolved?: string;
+    resolvedNote?: string;
+    communication?: string;
+    communicationNote?: string;
+    explanationQuality?: string;
+  } | null;
   engineerRating: number;
   comment?: string;
   engineerId?: { _id?: unknown; name?: string } | string | null;
@@ -84,9 +104,9 @@ export function toFeedbackDTO(doc: {
     date: doc.date,
     time: doc.time,
     shift: doc.shift,
-    devices: doc.devices,
-    technicalAnswers: doc.technicalAnswers,
-    engineerAnswers: doc.engineerAnswers,
+    devices: doc.devices as FeedbackDTO["devices"],
+    technicalAnswers: doc.technicalAnswers as FeedbackDTO["technicalAnswers"],
+    engineerAnswers: doc.engineerAnswers as FeedbackDTO["engineerAnswers"],
     engineerRating: doc.engineerRating,
     comment: doc.comment || "",
     engineerId: engineer?._id ? String(engineer._id) : undefined,
