@@ -29,12 +29,15 @@ export function LocationSelector({
 
   const checkins = locations.filter((item) => item.type === "checkin");
   const gates = locations.filter((item) => item.type === "gate");
-  const gateNumber = (code: string) => {
-    const match = /^(?:DOM)?GATE(\d+)$/i.exec(code);
-    return match ? Number(match[1]) : 999;
+  const gateParts = (code: string) => {
+    const match = /^(?:DOM)?GATE(\d+)(?:-(\d+))?$/i.exec(code);
+    return match ? [Number(match[1]), Number(match[2] || 0)] : [999, 0];
   };
-  const byGateNumber = (a: LocationDTO, b: LocationDTO) =>
-    gateNumber(a.code) - gateNumber(b.code);
+  const byGateNumber = (a: LocationDTO, b: LocationDTO) => {
+    const [left, leftPart] = gateParts(a.code);
+    const [right, rightPart] = gateParts(b.code);
+    return left === right ? leftPart - rightPart : left - right;
+  };
   const internationalGates = gates
     .filter((item) => item.code.startsWith("GATE") && gateNumber(item.code) <= 6)
     .sort(byGateNumber);
@@ -135,7 +138,7 @@ export function LocationSelector({
             <optgroup key={group.label} label={group.label}>
               {group.items.map((location) => (
                 <option key={location._id} value={location._id}>
-                  {`Gate ${gateNumber(location.code)}`}
+                  {location.name}
                 </option>
               ))}
             </optgroup>

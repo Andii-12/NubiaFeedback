@@ -41,7 +41,7 @@ const TEXT: Record<string, Record<string, Pair>> = {
     tangled: { mn: "Цаас дамарт орооцолдсон", en: "Paper tangled on the reel" },
     streaked: { mn: "Зураастай хэвлэсэн", en: "Printed with streaks" },
     noprint: { mn: "Хэвлэхгүй байсан", en: "Was not printing" },
-    chewed: { mn: "Цаасаа зажилсан", en: "Chewed the paper" },
+    chewed: { mn: "Цаас гацсан", en: "Paper jammed" },
   },
   scan: {
     normal: { mn: "Хэвийн уншсан", en: "Read normally" },

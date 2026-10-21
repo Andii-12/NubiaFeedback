@@ -83,6 +83,18 @@ function buildLocations() {
       code: "DOMGATE21",
       type: "gate",
       qrIdentifier: "DOMGATE21",
+    },
+    {
+      name: "Gate 21-1",
+      code: "DOMGATE21-1",
+      type: "gate",
+      qrIdentifier: "DOMGATE21-1",
+    },
+    {
+      name: "Gate 21-2",
+      code: "DOMGATE21-2",
+      type: "gate",
+      qrIdentifier: "DOMGATE21-2",
     }
   );
   return locations;
@@ -207,6 +219,16 @@ async function syncGateLocations() {
       name: "Gate 21",
       code: "DOMGATE21",
       qrIdentifier: "DOMGATE21",
+    },
+    {
+      name: "Gate 21-1",
+      code: "DOMGATE21-1",
+      qrIdentifier: "DOMGATE21-1",
+    },
+    {
+      name: "Gate 21-2",
+      code: "DOMGATE21-2",
+      qrIdentifier: "DOMGATE21-2",
     },
   ];
 

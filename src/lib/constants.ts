@@ -47,7 +47,7 @@ export const DEVICE_STATUS: {
 
 export const DCP_STATUS: { value: string; label: string }[] = [
   { value: "faded", label: "Бүдэг хэвлэсэн" },
-  { value: "chewed", label: "Цаасаа зажилсан" },
+  { value: "chewed", label: "Цаас гацсан" },
   { value: "noprint", label: "Хэвлэхгүй байсан" },
 ];
 

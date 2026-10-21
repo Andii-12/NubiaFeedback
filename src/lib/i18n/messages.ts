@@ -266,7 +266,7 @@ const copy = {
       speed: "How quickly did the engineer respond?",
       resolvedFast: "Did the engineer resolve it quickly?",
       fully: "Was the issue fully resolved?",
-      communication: "How was the engineer's manner?",
+      communication: "How was your communication with the engineer?",
       explanation: "Was the engineer's explanation clear?",
       rating: "Overall engineer service rating",
       pickRating: "Select a rating",
