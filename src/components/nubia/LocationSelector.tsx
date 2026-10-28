@@ -39,7 +39,7 @@ export function LocationSelector({
     return left === right ? leftPart - rightPart : left - right;
   };
   const internationalGates = gates
-    .filter((item) => item.code.startsWith("GATE") && gateNumber(item.code) <= 6)
+    .filter((item) => item.code.startsWith("GATE") && gateParts(item.code)[0] <= 6)
     .sort(byGateNumber);
   const domesticGates = gates
     .filter((item) => item.code.startsWith("DOMGATE"))
