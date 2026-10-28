@@ -47,7 +47,7 @@ export const DEVICE_STATUS: {
 
 export const DCP_STATUS: { value: string; label: string }[] = [
   { value: "faded", label: "Бүдэг хэвлэсэн" },
-  { value: "chewed", label: "Цаас гацсан" },
+  { value: "jammed", label: "Цаас гацсан" },
   { value: "noprint", label: "Хэвлэхгүй байсан" },
 ];
 
@@ -72,6 +72,13 @@ export const SCANNING_STATUS: { value: ScanningStatus; label: string }[] = [
   { value: "retries", label: "Олон дахин оролдсон" },
   { value: "partial", label: "Заримдаа уншаагүй" },
   { value: "none", label: "Огт уншаагүй" },
+];
+
+export const BGR_STATUS: { value: string; label: string }[] = [
+  { value: "shutter", label: "Shutter closed болсон" },
+  { value: "barcode", label: "Barcode уншихгүй байсан" },
+  { value: "interrupt", label: "Interrupt болсон" },
+  { value: "nowork", label: "Огт ажиллахгүй байсан" },
 ];
 
 export const KEYBOARD_STATUS: { value: string; label: string }[] = [

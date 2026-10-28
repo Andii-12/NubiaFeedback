@@ -52,6 +52,10 @@ const TEXT: Record<string, Record<string, Pair>> = {
     misread: { mn: "Алдаж уншсан", en: "Read incorrectly" },
     keys: { mn: "Үсэг ажиллахгүй байсан", en: "Keys were not working" },
     unread: { mn: "Уншихгүй байсан", en: "Was not reading" },
+    shutter: { mn: "Shutter closed болсон", en: "Shutter closed" },
+    barcode: { mn: "Barcode уншихгүй байсан", en: "Barcode was not reading" },
+    interrupt: { mn: "Interrupt болсон", en: "Interrupted" },
+    nowork: { mn: "Огт ажиллахгүй байсан", en: "Was not working at all" },
   },
   work: {
     normal: { mn: "Хэвийн", en: "Normal" },

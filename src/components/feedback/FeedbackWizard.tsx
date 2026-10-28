@@ -409,15 +409,17 @@ export function FeedbackWizard() {
                               }
                               className={pillClass(answer.detail === item.value)}
                             >
-                              {optionLabel(
-                                locale,
-                                deviceDetailKind(device) === "print"
-                                  ? "print"
-                                  : deviceDetailKind(device) === "scan"
-                                    ? "scan"
-                                    : "work",
-                                item.value
-                              )}
+                              {locale === "mn"
+                                ? item.label
+                                : optionLabel(
+                                    locale,
+                                    deviceDetailKind(device) === "print"
+                                      ? "print"
+                                      : deviceDetailKind(device) === "scan"
+                                        ? "scan"
+                                        : "work",
+                                    item.value
+                                  )}
                             </button>
                           ))}
                         </div>

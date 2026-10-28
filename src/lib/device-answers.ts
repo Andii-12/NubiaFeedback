@@ -2,6 +2,7 @@ import {
   DEVICES,
   PRINT_DEVICES,
   PRINTING_STATUS,
+  BGR_STATUS,
   BTP_STATUS,
   DCP_STATUS,
   DCS_STATUS,
@@ -55,6 +56,7 @@ export function detailQuestion(device: string, locale: Locale = "mn") {
 export function detailOptions(device: string) {
   const kind = deviceDetailKind(device);
   if (device === "OCR") return KEYBOARD_STATUS;
+  if (device === "BGR") return BGR_STATUS;
   if (device === "WS") return DCS_STATUS;
   if (device === "BTP" || device === "BPP") return BTP_STATUS;
   if (device === "DCP") return DCP_STATUS;

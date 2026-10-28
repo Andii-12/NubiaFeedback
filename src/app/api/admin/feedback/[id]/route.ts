@@ -69,7 +69,7 @@ export async function PATCH(
     "",
     `Дугаар: ${preview.requestId}`,
     `Огноо: ${preview.date} ${preview.time}`,
-    `Авиакомпани: ${preview.airlineName || "—"}`,
+    `Авиа компани: ${preview.airlineName || "—"}`,
     `Байршил: ${preview.locationName || "—"}`,
     `Төхөөрөмж: ${labels.devices(preview.devices)}`,
     `Ажиллагаа: ${labels.deviceReport(preview.technicalAnswers.deviceAnswers, preview.technicalAnswers.deviceStatus)}`,
