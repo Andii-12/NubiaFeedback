@@ -34,7 +34,7 @@ const TEXT: Record<string, Record<string, Pair>> = {
   print: {
     normal: { mn: "Хэвийн хэвлэж байсан", en: "Printed normally" },
     slow: { mn: "Удаан хэвлэж байсан", en: "Printed slowly" },
-    jammed: { mn: "Цаас гацсан", en: "Paper jam" },
+    jammed: { mn: "Цаас гацсан", en: "Paper jammed" },
     faded: { mn: "Бүдэг хэвлэсэн", en: "Faded print" },
     none: { mn: "Огт хэвлээгүй", en: "Did not print" },
     nocut: { mn: "Цаасаа таслахгүй байсан", en: "Was not cutting the paper" },
@@ -53,7 +53,7 @@ const TEXT: Record<string, Record<string, Pair>> = {
     keys: { mn: "Үсэг ажиллахгүй байсан", en: "Keys were not working" },
     unread: { mn: "Уншихгүй байсан", en: "Was not reading" },
     shutter: { mn: "Shutter closed болсон", en: "Shutter closed" },
-    barcode: { mn: "Barcode уншихгүй байсан", en: "Barcode was not reading" },
+    barcode: { mn: "Barcode уншихгүй байсан", en: "Barcode was not being read" },
     interrupt: { mn: "Interrupt болсон", en: "Interrupted" },
     nowork: { mn: "Огт ажиллахгүй байсан", en: "Was not working at all" },
   },
@@ -123,7 +123,7 @@ const LINE: Record<string, Pair> = {
   },
   pickDetail: {
     mn: "{name} дэлгэрэнгүй ажиллагааг сонгоно уу.",
-    en: "Select the {name} details.",
+    en: "Select the details for {name}.",
   },
   printQ: {
     mn: "{name} хэвлэлт ямар байсан бэ?",

@@ -110,7 +110,7 @@ const COPY = {
     issue: "Issue",
     ok: "Normal",
     unrated: "unrated",
-    ofKnown: "of recorded",
+    ofKnown: "of recorded cases",
   },
 } as const;
 
