@@ -62,6 +62,6 @@ export const engineerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("И-мэйл буруу байна."),
+  email: z.string().email("Имэйл буруу байна."),
   password: z.string().min(1, "Нууц үг оруулна уу."),
 });
